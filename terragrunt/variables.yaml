@@ -23,6 +23,6 @@ region: fr-par
 zone: fr-par-1
 scaleway_project_id: "0d4603b7-bfcc-4860-87fc-a5e755efec65" # pgdays-workshop
 network_mask: "172.18.0.0/22"
-workshop_domain: "campto.amp"
+workshop_domain: "campto.camp"
 users: 3
 ...
