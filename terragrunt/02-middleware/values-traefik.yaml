@@ -7,9 +7,6 @@ deployment:
 
 additionalArguments:
   - "--api.insecure=true"
-  - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
-  - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
-  - "--entryPoints.web.http.redirections.entryPoint.permanent=false"
 
 rbac:
   aggregateTo:
@@ -24,6 +21,12 @@ service:
 
 ports:
   web:
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: false
     proxyProtocol:
       trustedIPs: ["0.0.0.0/0"]
   websecure:
