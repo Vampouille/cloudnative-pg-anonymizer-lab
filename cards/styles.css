@@ -1,0 +1,56 @@
+@page {
+    size: A4;
+    margin: 15mm;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6mm;
+}
+
+.card {
+    border: 1.5px solid #2c3e50;
+    border-radius: 4px;
+    padding: 6mm;
+    break-inside: avoid;
+}
+
+.card-title {
+    font-size: 8pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #2c3e50;
+    border-bottom: 1px solid #2c3e50;
+    padding-bottom: 2mm;
+    margin-bottom: 3mm;
+}
+
+.field {
+    margin-bottom: 2mm;
+}
+
+.label {
+    font-size: 6pt;
+    text-transform: uppercase;
+    color: #7f8c8d;
+    font-weight: bold;
+    display: block;
+}
+
+.value {
+    font-size: 8pt;
+    color: #2c3e50;
+    word-break: break-all;
+}
