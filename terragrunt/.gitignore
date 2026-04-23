@@ -1,0 +1,6 @@
+kubeconfig-admin
+.terraform/
+charts/
+terraform.tfstate
+terraform.tfstate.backup
+terragrunt-debug.tfvars.json
