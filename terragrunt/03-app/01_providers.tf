@@ -1,7 +1,7 @@
-#provider "aws" {
-#  profile = "c2c-is-training"
-#  region = "eu-west-1"
-#}
+provider "aws" {
+  profile = "c2c-is-training"
+  region = "eu-west-1"
+}
 
 variable "kubeconfig" {
   description = "Cluster credentials"
@@ -10,6 +10,15 @@ variable "kubeconfig" {
     host                   = string
     cluster_ca_certificate = string
     token                  = string
+  })
+}
+
+variable "ingress_lb" {
+  description = "Public ingress load balancer info from 01-kapsule"
+  type = object({
+    id         = string
+    ip         = string
+    private_ip = string
   })
 }
 
