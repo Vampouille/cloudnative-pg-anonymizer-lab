@@ -1,0 +1,23 @@
+crds:
+  install: true
+global:
+  nodeSelector:
+    k8s.scaleway.com/project-env: infra
+admissionController:
+  nodeSelector:
+    k8s.scaleway.com/project-env: infra
+backgroundController:
+  nodeSelector:
+    k8s.scaleway.com/project-env: infra
+cleanupController:
+  nodeSelector:
+    k8s.scaleway.com/project-env: infra
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      cpu: 1000m
+      memory: 256Mi
+reportsController:
+  nodeSelector:
+    k8s.scaleway.com/project-env: infra

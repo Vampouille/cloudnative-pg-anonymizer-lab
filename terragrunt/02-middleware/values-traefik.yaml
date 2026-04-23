@@ -1,0 +1,41 @@
+providers:
+  kubernetesIngress:
+    ingressClass: traefik
+
+deployment:
+  replicas: 1
+
+additionalArguments:
+  - "--api.insecure=true"
+  - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
+  - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+  - "--entryPoints.web.http.redirections.entryPoint.permanent=false"
+
+rbac:
+  aggregateTo:
+    - "admin"
+
+service:
+  type: "LoadBalancer"
+  annotations:
+    service.beta.kubernetes.io/scw-loadbalancer-id: "${lb_id}"
+    service.beta.kubernetes.io/scw-loadbalancer-externally-managed: "true"
+    service.beta.kubernetes.io/scw-loadbalancer-proxy-protocol-v2: "true"
+
+ports:
+  web:
+    proxyProtocol:
+      trustedIPs: ["0.0.0.0/0"]
+  websecure:
+    proxyProtocol:
+      trustedIPs: ["0.0.0.0/0"]
+
+resources:
+  limits:
+    memory: "512Mi"
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+
+nodeSelector:
+  k8s.scaleway.com/project-env: infra
