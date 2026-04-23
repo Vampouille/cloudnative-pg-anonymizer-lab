@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Workshop CloudNativePG – __USERNAME__</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    body { padding-top: 60px; background: #f0f4f8; }
+    .navbar-brand { font-weight: 700; letter-spacing: .02em; }
+    .navbar { border-bottom: 2px solid #0d6efd; }
+    /* Accordion header colours */
+    .accordion-button { font-weight: 600; background: #e8f1fb; color: #1a4d8a; }
+    .accordion-button:not(.collapsed) { background: #1a4d8a; color: #fff; box-shadow: none; }
+    .accordion-button:not(.collapsed)::after { filter: invert(1); }
+    /* Callout blocks */
+    .callout-goal { border-left: 4px solid #198754; background: #d1e7dd; }
+    .callout-tip  { border-left: 4px solid #ffc107; background: #fff3cd; }
+    /* SA token display */
+    #token-text {
+      font-family: 'Courier New', monospace;
+      font-size: .8em;
+      word-break: break-all;
+      background: #1e272e;
+      color: #dfe6e9;
+      border: 1px solid #495057;
+      border-radius: .375rem;
+      padding: .75rem 1rem;
+    }
+    /* Code blocks */
+    pre { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: .375rem; padding: .85rem 1rem; overflow-x: auto; }
+    code { font-family: 'Courier New', monospace; font-size: .88em; }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       STICKY NAVBAR  (Bootstrap)
+  ══════════════════════════════════════════════════════════════ -->
+  <nav class="navbar navbar-dark bg-dark fixed-top px-3 gap-2">
+    <span class="navbar-brand me-2">&#9714; CNPG Workshop</span>
+
+    <a class="btn btn-sm btn-primary"
+       href="https://__USERNAME__.campto.camp/kubeconfig" download="kubeconfig">
+      &#8659; kubeconfig
+    </a>
+
+    <button class="btn btn-sm btn-success"
+            data-bs-toggle="modal" data-bs-target="#tokenModal">
+      &#128273; Token
+    </button>
+
+    <a class="btn btn-sm"
+       style="background:#7c3aed;color:#fff;border-color:#7c3aed"
+       href="https://__USERNAME__:__PASSWORD__@dashboard.campto.camp" target="_blank">
+      &#9654; Dashboard
+    </a>
+
+    <div class="d-flex gap-2 ms-auto">
+      <a class="btn btn-sm btn-outline-light"
+         href="https://cloudnative-pg.io/documentation/current/" target="_blank">&#128218; CNPG Docs</a>
+      <a class="btn btn-sm btn-outline-light"
+         href="__SLIDES_PDF_URL__" target="_blank">&#128196; Slides</a>
+      <a class="btn btn-sm btn-outline-light"
+         href="__GIT_REPO_URL__" target="_blank">&#128279; Git repo</a>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       TOKEN MODAL  (Bootstrap)
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="modal fade" id="tokenModal" tabindex="-1"
+       aria-labelledby="tokenModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title" id="tokenModalLabel">&#128273; Service Account Token</h5>
+          <button type="button" class="btn-close btn-close-white"
+                  data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-secondary small">
+            Paste this token on the dashboard login page
+            (select <strong class="text-info">Token</strong>):
+          </p>
+          <div id="token-text">__SA_TOKEN__</div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-success btn-sm"
+                  onclick="copyToken()">&#128203; Copy token</button>
+          <button type="button" class="btn btn-secondary btn-sm"
+                  data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       MAIN CONTENT
+  ══════════════════════════════════════════════════════════════ -->
+  <main class="container" style="max-width:860px; padding: 2rem 1rem 4rem;">
+
+    <h1 class="border-bottom pb-2 mb-2">Workshop CloudNativePG &amp; pg_anonymizer</h1>
+    <div class="alert alert-info py-2 mb-4">
+      Participant: <strong>__USERNAME__</strong> &nbsp;|&nbsp;
+      Namespace: <code>__USERNAME__</code>
+    </div>
+
+    <!-- data-bs-parent enforces one-open-at-a-time -->
+    <div class="accordion" id="workshopAccordion">
+
+      <!-- ── Step 0 ── -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#step0"
+                  aria-expanded="true" aria-controls="step0">
+            Step 0 – Connect to the Kubernetes Cluster
+          </button>
+        </h2>
+        <div id="step0" class="accordion-collapse collapse show"
+             data-bs-parent="#workshopAccordion">
+          <div class="accordion-body">
+            <div class="callout-goal p-3 rounded mb-3">
+              <strong>Goal:</strong> Configure your local tools and authenticate to the cluster.
+            </div>
+
+            <h6>1. Install kubectl</h6>
+            <p>Make sure <code>kubectl</code> is installed on your machine:</p>
+            <pre><code># Linux (amd64)
+curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl &amp;&amp; sudo mv kubectl /usr/local/bin/
+
+# macOS (Homebrew)
+brew install kubectl
+
+# Windows (winget)
+winget install Kubernetes.kubectl</code></pre>
+            <pre><code>kubectl version --client</code></pre>
+
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Tip:</strong> Consider also installing
+              <a href="https://k9scli.io/" target="_blank">k9s</a>,
+              a terminal UI to browse pods, logs and events without typing <code>kubectl</code> commands.
+              <pre class="mb-0 mt-2"><code>brew install derailed/k9s/k9s   # macOS / Linux</code></pre>
+            </div>
+
+            <h6>2. Download your kubeconfig</h6>
+            <p>Click the button below (or use the toolbar button), then move the file to <code>~/.kube/config</code>:</p>
+            <a class="btn btn-primary btn-sm"
+               href="https://__USERNAME__.campto.camp/kubeconfig" download="kubeconfig">
+              &#8659; Download KUBECONFIG
+            </a>
+
+            <h6 class="mt-3">3. Set your default namespace</h6>
+            <pre><code>kubectl config set-context --current --namespace=__USERNAME__</code></pre>
+            <pre><code>kubectl get pods</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Step 1 ── -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#step1"
+                  aria-expanded="false" aria-controls="step1">
+            Step 1 – Kubernetes Dashboard
+          </button>
+        </h2>
+        <div id="step1" class="accordion-collapse collapse"
+             data-bs-parent="#workshopAccordion">
+          <div class="accordion-body">
+            <div class="callout-goal p-3 rounded mb-3">
+              <strong>Goal:</strong> Access the graphical Kubernetes Dashboard to visualize your resources.
+            </div>
+
+            <h6>1. Copy your service account token</h6>
+            <p>Use the <strong>Token</strong> button in the toolbar to display and copy your token,
+               then paste it on the dashboard login page.</p>
+            <button class="btn btn-success btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#tokenModal">
+              &#128273; Show / Copy Token
+            </button>
+
+            <h6 class="mt-3">2. Open the dashboard</h6>
+            <p>You will be prompted for your credentials:
+               <strong>__USERNAME__</strong> / <strong>__PASSWORD__</strong>.</p>
+            <a class="btn btn-sm"
+               style="background:#7c3aed;color:#fff"
+               href="https://__USERNAME__:__PASSWORD__@dashboard.campto.camp" target="_blank">
+              &#9654; Open Kubernetes Dashboard
+            </a>
+
+            <div class="callout-tip p-3 rounded mt-3">
+              <strong>Tip:</strong> In the top-left namespace selector, choose
+              <code>__USERNAME__</code> to scope the view to your resources only.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Exercise 1 ── -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#ex1"
+                  aria-expanded="false" aria-controls="ex1">
+            Exercise 1 – Create a CloudNativePG Cluster
+          </button>
+        </h2>
+        <div id="ex1" class="accordion-collapse collapse"
+             data-bs-parent="#workshopAccordion">
+          <div class="accordion-body">
+            <div class="callout-goal p-3 rounded mb-3">
+              <strong>Goal:</strong> Deploy a 3-instance PostgreSQL cluster managed by CloudNativePG.
+            </div>
+
+            <p>Create the following manifest and apply it:</p>
+            <pre><code>apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-primary
+  namespace: __USERNAME__
+spec:
+  instances: 3
+  storage:
+    size: 1Gi
+  # TODO: add your configuration here</code></pre>
+
+            <pre><code>kubectl apply -f cluster-primary.yaml</code></pre>
+
+            <p>Wait for the cluster to be ready:</p>
+            <pre><code>kubectl get cluster cluster-primary -w</code></pre>
+
+            <div class="callout-tip p-3 rounded">
+              <strong>Tip:</strong> <!-- Add hints or links to documentation here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Exercise 2 ── -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#ex2"
+                  aria-expanded="false" aria-controls="ex2">
+            Exercise 2 – Create a Replica Cluster
+          </button>
+        </h2>
+        <div id="ex2" class="accordion-collapse collapse"
+             data-bs-parent="#workshopAccordion">
+          <div class="accordion-body">
+            <div class="callout-goal p-3 rounded mb-3">
+              <strong>Goal:</strong> Deploy a second cluster as a streaming replica of <code>cluster-primary</code>.
+            </div>
+
+            <pre><code>apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-replica
+  namespace: __USERNAME__
+spec:
+  instances: 2
+  storage:
+    size: 1Gi
+  replica:
+    enabled: true
+    source: cluster-primary
+  externalClusters:
+    - name: cluster-primary
+      connectionParameters:
+        host: cluster-primary-rw.__USERNAME__.svc
+        user: streaming_replica
+        dbname: postgres
+      # TODO: add the secret reference for replication credentials</code></pre>
+
+            <pre><code>kubectl apply -f cluster-replica.yaml
+kubectl get cluster cluster-replica -w</code></pre>
+
+            <div class="callout-tip p-3 rounded">
+              <strong>Tip:</strong> <!-- Add hints about replication secrets here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Exercise 3 ── -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#ex3"
+                  aria-expanded="false" aria-controls="ex3">
+            Exercise 3 – Promote the Replica Cluster
+          </button>
+        </h2>
+        <div id="ex3" class="accordion-collapse collapse"
+             data-bs-parent="#workshopAccordion">
+          <div class="accordion-body">
+            <div class="callout-goal p-3 rounded mb-3">
+              <strong>Goal:</strong> Promote <code>cluster-replica</code> to become a standalone primary.
+            </div>
+
+            <pre><code>kubectl patch cluster cluster-replica \
+  --type=merge \
+  -p '{"spec":{"replica":{"enabled":false}}}'</code></pre>
+
+            <p>Verify that <code>cluster-replica</code> now has its own primary instance:</p>
+            <pre><code>kubectl get cluster cluster-replica
+kubectl get pods -l cnpg.io/cluster=cluster-replica</code></pre>
+
+            <div class="callout-tip p-3 rounded">
+              <strong>Tip:</strong> <!-- Add notes about what happens to the original primary here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /accordion -->
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function copyToken() {
+      var text = document.getElementById('token-text').textContent.trim();
+      navigator.clipboard.writeText(text).then(function () {
+        document.querySelectorAll('[onclick="copyToken()"]').forEach(function (btn) {
+          var orig = btn.innerHTML;
+          btn.innerHTML = '&#10003; Copied!';
+          setTimeout(function () { btn.innerHTML = orig; }, 2000);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

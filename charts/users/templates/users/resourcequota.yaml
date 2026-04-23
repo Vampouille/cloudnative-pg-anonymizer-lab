@@ -1,0 +1,23 @@
+{{- if .Values.resourceQuota.enabled }}
+{{- range .Values.users }}
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ .username }}-quota
+  namespace: {{ .username }}
+  labels:
+    {{- include "users.labels" $ | nindent 4 }}
+spec:
+  hard:
+    pods: {{ $.Values.resourceQuota.pods | quote }}
+    services: {{ $.Values.resourceQuota.services | quote }}
+    persistentvolumeclaims: {{ $.Values.resourceQuota.persistentvolumeclaims | quote }}
+    secrets: {{ $.Values.resourceQuota.secrets | quote }}
+    configmaps: {{ $.Values.resourceQuota.configmaps | quote }}
+    requests.cpu: {{ index $.Values.resourceQuota "requests.cpu" | quote }}
+    requests.memory: {{ index $.Values.resourceQuota "requests.memory" | quote }}
+    limits.cpu: {{ index $.Values.resourceQuota "limits.cpu" | quote }}
+    limits.memory: {{ index $.Values.resourceQuota "limits.memory" | quote }}
+{{- end }}
+{{- end }}

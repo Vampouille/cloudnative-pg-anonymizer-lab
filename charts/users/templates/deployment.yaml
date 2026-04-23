@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "users.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "users.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "users.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "users.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "users.fullname" . }}
+      containers:
+        - name: nginx
+          #securityContext:
+          #  capabilities:
+          #    drop:
+          #    - ALL
+          #    add:
+          #    - CAP_CHOWN
+          #    - CAP_SETUID
+          #  readOnlyRootFilesystem: true
+          #  allowPrivilegeEscalation: false
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: run
+              mountPath: /var/run
+            - name: tmp
+              mountPath: /tmp
+            - name: users-instructions
+              mountPath: /usr/share/nginx/html/instructions
+              readOnly: true
+            - name: users-kubeconfigs
+              mountPath: /usr/share/nginx/html/kubeconfigs
+              readOnly: true
+      volumes:
+        - name: cache
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: users-instructions
+          configMap:
+            name: {{ include "users.fullname" . }}-instructions
+        - name: users-kubeconfigs
+          secret:
+            secretName: {{ include "users.fullname" . }}-kubeconfigs

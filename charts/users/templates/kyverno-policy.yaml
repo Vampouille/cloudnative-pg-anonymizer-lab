@@ -1,0 +1,37 @@
+{{- $namespaces := list }}
+{{- range .Values.users }}
+{{- $namespaces = append $namespaces .username }}
+{{- end }}
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: {{ include "users.fullname" . }}-restrict-network-exposure
+  labels:
+    {{- include "users.labels" . | nindent 4 }}
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: deny-loadbalancer-service
+      match:
+        any:
+          - resources:
+              kinds:
+                - Service
+              namespaces: {{ toJson $namespaces }}
+      validate:
+        message: "LoadBalancer services are not allowed in user namespaces."
+        pattern:
+          spec:
+            type: "!LoadBalancer"
+    - name: deny-ingress
+      match:
+        any:
+          - resources:
+              kinds:
+                - Ingress
+              namespaces: {{ toJson $namespaces }}
+      validate:
+        message: "Ingress resources are not allowed in user namespaces."
+        deny: {}
