@@ -39,6 +39,11 @@ resource "helm_release" "this" {
       host    = local.variables.workshop_domain
       enabled = true
     }
+    # Force redeployment when local chart files change
+    chartChecksum = sha1(join("", [
+      for f in sort(fileset("${path.module}/../../charts/users", "**")) :
+      filesha1("${path.module}/../../charts/users/${f}")
+    ]))
   })]
 
 }
