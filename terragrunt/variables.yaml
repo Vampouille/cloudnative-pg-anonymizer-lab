@@ -8,15 +8,15 @@ cluster:
   version: "1.35"
   pools:
     infra:
-      size: 3
+      size: 2
       tags: ["infra", "project-env=infra"]
-      node_type: DEV1-M
+      node_type: DEV1-L
       root_volume_size_in_gb: 20
       root_volume_type: sbs_5k
     worker:
       size: 1
       tags: ["worker", "project-env=worker"]
-      node_type: DEV1-M
+      node_type: DEV1-L
       root_volume_size_in_gb: 20
       root_volume_type: sbs_5k
 region: fr-par
