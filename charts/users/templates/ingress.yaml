@@ -1,32 +1,42 @@
-{{- if .Values.ingress.enabled -}}
+{{- range .Values.users }}
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "users.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "users.fullname" $ }}-{{ .username}}
+  namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "users.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+    {{- include "users.labels" $ | nindent 4 }}
   annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ $.Release.Namespace }}-basicauth-{{ .username }}@kubernetescrd"
+    cert-manager.io/cluster-issuer: "letsencrypt"
+  {{- with $.Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- with .Values.ingress.className }}
+  {{- with $.Values.ingress.className }}
   ingressClassName: {{ . }}
   {{- end }}
   tls:
     - hosts:
-        - {{ .Values.ingress.host | quote }}
-      secretName: {{ include "users.fullname" . }}-tls
+        - {{ .username }}.{{ $.Values.ingress.host }}
+      secretName: {{ include "users.fullname" $ }}-{{ .username }}-tls
   rules:
-    - host: {{ .Values.ingress.host | quote }}
+    - host: {{ .username }}.{{ $.Values.ingress.host }}
       http:
         paths:
           - path: /
-            pathType: Prefix
+            pathType: Exact
             backend:
               service:
-                name: {{ include "users.fullname" . }}
+                name: {{ include "users.fullname" $ }}
+                port:
+                  name: http
+          - path: /kubeconfig
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "users.fullname" $ }}
                 port:
                   name: http
 {{- end }}

@@ -1,0 +1,35 @@
+{{- range .Values.users }}
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: basicauth-{{ .username }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  basicAuth:
+    secret: basicauth-{{ .username }}
+    removeHeader: true
+{{- end }}
+{{- range .Values.users }}
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: basicauth-{{ .username }}
+  namespace: {{ $.Release.Namespace }}
+type: kubernetes.io/basic-auth
+stringData:
+  username: {{ .username }}
+  password: {{ .password | quote }}
+{{- end }}
+{{- range .Values.users }}
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: rewrite-{{ .username }}-instructions
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replacePath:
+    path: "/instructions/{{ .username }}.html"
+{{- end }}

@@ -52,6 +52,10 @@ spec:
               mountPath: /var/run
             - name: tmp
               mountPath: /tmp
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
             - name: users-instructions
               mountPath: /usr/share/nginx/html/instructions
               readOnly: true
@@ -65,6 +69,9 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
+        - name: nginx-conf
+          configMap:
+            name: {{ include "users.fullname" . }}-nginx-conf
         - name: users-instructions
           configMap:
             name: {{ include "users.fullname" . }}-instructions
