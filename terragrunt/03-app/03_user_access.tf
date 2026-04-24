@@ -17,6 +17,10 @@ locals {
   ]
 }
 
+output "users_passwords" {
+  value = { for u in local.users : u.username => u.password }
+  sensitive = true
+}
 
 resource "helm_release" "this" {
   name       = "users"

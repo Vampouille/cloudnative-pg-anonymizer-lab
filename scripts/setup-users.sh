@@ -45,49 +45,37 @@ export KUBECONFIG="${KUBECONFIG_ADMIN}"
 # --------------------------------------------------------------------------
 USER_COUNT=$(yq '.users' "${VARIABLES_FILE}")
 CLUSTER_NAME=$(yq '.name' "${VARIABLES_FILE}")
-
-echo "==> ${USER_COUNT} users to configure on cluster '${CLUSTER_NAME}'"
-
-# --------------------------------------------------------------------------
-# 2. Build ConfigMap with one HTML entry per user
-# --------------------------------------------------------------------------
-CM_NAME="${RELEASE_NAME}-instructions"
-
-# Generate one HTML file per user in a fresh temp directory
-TMPDIR_HTML=$(mktemp -d)
-trap 'rm -rf "${TMPDIR_HTML}"' EXIT
-
-for i in $(seq 1 "${USER_COUNT}"); do
-  USERNAME="user${i}"
-  sed "s/__USERNAME__/${USERNAME}/g" "${INSTRUCTIONS_TPL}" > "${TMPDIR_HTML}/${USERNAME}.html"
-done
-
-echo "==> Applying ConfigMap '${CM_NAME}' in namespace '${RELEASE_NAMESPACE}'..."
-kubectl create configmap "${CM_NAME}" \
-  --namespace="${RELEASE_NAMESPACE}" \
-  --from-file="${TMPDIR_HTML}" \
-  --dry-run=client -o yaml \
-  | kubectl apply -f -
-
-echo "    ConfigMap updated."
-
-# --------------------------------------------------------------------------
-# 3. Extract cluster info from admin kubeconfig
-# --------------------------------------------------------------------------
 SERVER=$(kubectl config view --minify --raw -o jsonpath='{.clusters[0].cluster.server}')
 CA_DATA=$(kubectl config view --minify --raw -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')
 K8S_CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}')
 
 # --------------------------------------------------------------------------
-# 4. Generate kubeconfig per user
+# 2. Fetch passwords
 # --------------------------------------------------------------------------
+
+PASSWORD_FILE=$(mktemp -p /dev/shm)
+cd "${REPO_ROOT}/terragrunt/03-app" && terraform output -json users_passwords > "${PASSWORD_FILE}"
+
+
+# --------------------------------------------------------------------------
+# 3. Build ConfigMap with one HTML entry per user
+# --------------------------------------------------------------------------
+echo "==> ${USER_COUNT} users to configure on cluster '${CLUSTER_NAME}'"
+CM_NAME="${RELEASE_NAME}-instructions"
+
+# Generate one HTML file per user in a fresh temp directory
+TMPDIR_HTML=$(mktemp -d)
+trap 'rm -rf "${TMPDIR_HTML}"' EXIT
 mkdir -p "${KUBECONFIGS_DIR}"
 
 for i in $(seq 1 "${USER_COUNT}"); do
+
   USERNAME="user${i}"
   SECRET_NAME="${USERNAME}"
   NAMESPACE="${USERNAME}"
+  PASSWORD=$(yq ".${USERNAME}" "${PASSWORD_FILE}")
 
+  # Fetch token
   echo "==> Waiting for SA token: secret '${SECRET_NAME}' in namespace '${NAMESPACE}'..."
 
   TOKEN=""
@@ -109,7 +97,8 @@ for i in $(seq 1 "${USER_COUNT}"); do
     continue
   fi
 
-  KUBECONFIG_FILE="${KUBECONFIGS_DIR}/${USERNAME}.yaml"
+  # Build kubeconfig 
+  KUBECONFIG_FILE="${KUBECONFIGS_DIR}/${USERNAME}-kubeconfig.yaml"
   cat > "${KUBECONFIG_FILE}" <<EOF
 apiVersion: v1
 kind: Config
@@ -132,14 +121,31 @@ users:
 EOF
   chmod 600 "${KUBECONFIG_FILE}"
   echo "    Generated ${KUBECONFIG_FILE}"
+  
+  sed "s/__USERNAME__/${USERNAME}/g" "${INSTRUCTIONS_TPL}" \
+  | sed "s/__PASSWORD__/${PASSWORD}/g"  \
+  | sed "s/__SA_TOKEN__/${TOKEN}/g" > "${TMPDIR_HTML}/${USERNAME}.html"
+  
+  chmod 600 "${TMPDIR_HTML}/${USERNAME}.html"
+  echo "    Generated ${TMPDIR_HTML}/${USERNAME}.html"
 done
 
-# --------------------------------------------------------------------------
-# 5. Push all kubeconfigs into the users-kubeconfigs Secret
-# --------------------------------------------------------------------------
-SECRET_NAME="${RELEASE_NAME}-kubeconfigs"
-echo "==> Applying Secret '${SECRET_NAME}' in namespace '${RELEASE_NAMESPACE}'..."
-kubectl create secret generic "${SECRET_NAME}" \
+# ----------------------------
+# 5. Push ConfigMap and Secret
+# ----------------------------
+echo "==> Applying ConfigMap '${CM_NAME}' in namespace '${RELEASE_NAMESPACE}'..."
+kubectl create configmap "${CM_NAME}" \
+  --namespace="${RELEASE_NAMESPACE}" \
+  --from-file="${TMPDIR_HTML}" \
+  --dry-run=client -o yaml \
+  | kubectl apply -f -
+
+echo "    ConfigMap updated."
+
+
+KUBECONFIG_SECRET_NAME="${RELEASE_NAME}-kubeconfigs"
+echo "==> Applying Secret '${KUBECONFIG_SECRET_NAME}' in namespace '${RELEASE_NAMESPACE}'..."
+kubectl create secret generic "${KUBECONFIG_SECRET_NAME}" \
   --namespace="${RELEASE_NAMESPACE}" \
   --from-file="${KUBECONFIGS_DIR}" \
   --dry-run=client -o yaml \
@@ -147,4 +153,3 @@ kubectl create secret generic "${SECRET_NAME}" \
 echo "    Secret updated."
 
 echo ""
-echo "Done. Kubeconfigs written to: ${KUBECONFIGS_DIR}/"
