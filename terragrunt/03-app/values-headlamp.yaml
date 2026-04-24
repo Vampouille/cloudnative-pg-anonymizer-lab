@@ -1,0 +1,17 @@
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  hosts:
+    - host: dashboard.${domain}
+      paths:
+      - path: /
+        type: Prefix
+  tls:
+    - secretName: dashboard-tls
+      hosts:
+        - dashboard.${domain}
+  annotations:
+    # cert-manager: request a certificate from the letsencrypt ClusterIssuer
+    cert-manager.io/cluster-issuer: "letsencrypt"
+    # Attach the basicAuth middleware — format: <namespace>-<name>@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: "kubernetes-dashboard-dashboard-basicauth@kubernetescrd"
