@@ -3,12 +3,12 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "users.fullname" $ }}-{{ .username}}
+  name: {{ include "users.fullname" $ }}-{{ .username}}-instructions
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "users.labels" $ | nindent 4 }}
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: "{{ $.Release.Namespace }}-basicauth-{{ .username }}@kubernetescrd"
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ $.Release.Namespace }}-{{ .username }}-chain-instructions@kubernetescrd"
     cert-manager.io/cluster-issuer: "letsencrypt"
   {{- with $.Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
@@ -32,6 +32,32 @@ spec:
                 name: {{ include "users.fullname" $ }}
                 port:
                   name: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "users.fullname" $ }}-{{ .username}}-kubeconfig
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "users.labels" $ | nindent 4 }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ $.Release.Namespace }}-{{ .username }}-chain-kubeconfig@kubernetescrd"
+    cert-manager.io/cluster-issuer: "letsencrypt"
+  {{- with $.Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with $.Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  tls:
+    - hosts:
+        - {{ .username }}.{{ $.Values.ingress.host }}
+      secretName: {{ include "users.fullname" $ }}-{{ .username }}-tls
+  rules:
+    - host: {{ .username }}.{{ $.Values.ingress.host }}
+      http:
+        paths:
           - path: /kubeconfig
             pathType: Exact
             backend:

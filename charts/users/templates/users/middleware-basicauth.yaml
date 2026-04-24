@@ -1,35 +1,73 @@
 {{- range .Values.users }}
+# Basic auth for : 
+# * user1.campto.camp
+# * user1.campto.camp/kubeconfig
 ---
 kind: Middleware
 apiVersion: traefik.io/v1alpha1
 metadata:
-  name: basicauth-{{ .username }}
+  name: {{ .username }}-basicauth
   namespace: {{ $.Release.Namespace }}
 spec:
   basicAuth:
-    secret: basicauth-{{ .username }}
+    secret: {{ .username }}-basicauth
     removeHeader: true
-{{- end }}
-{{- range .Values.users }}
 ---
 kind: Secret
 apiVersion: v1
 metadata:
-  name: basicauth-{{ .username }}
+  name: {{ .username }}-basicauth
   namespace: {{ $.Release.Namespace }}
 type: kubernetes.io/basic-auth
 stringData:
   username: {{ .username }}
   password: {{ .password | quote }}
-{{- end }}
-{{- range .Values.users }}
+
+# Rewrite Middleware for : 
+# * user1.campto.camp --> /instructions/user1-instructions.html
+# * user1.campto.camp/kubeconfig --> /kubeconfigs/user1-kubeconfig.yaml
 ---
 kind: Middleware
 apiVersion: traefik.io/v1alpha1
 metadata:
-  name: rewrite-{{ .username }}-instructions
+  name: {{ .username }}-rewrite-instructions
   namespace: {{ $.Release.Namespace }}
 spec:
   replacePath:
     path: "/instructions/{{ .username }}.html"
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: {{ .username }}-rewrite-kubeconfig
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replacePath:
+    path: "/kubeconfigs/{{ .username }}-kubeconfig.yaml"
+
+# Chain (rewrite + basicauth) Middleware for : 
+# * user1.campto.camp
+# * user1.campto.camp/kubeconfig
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: {{ .username }}-chain-instructions
+  namespace: {{ $.Release.Namespace }}
+spec:
+  chain:
+    middlewares:
+    - name: {{ .username }}-basicauth
+    - name: {{ .username }}-rewrite-instructions
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: {{ .username }}-chain-kubeconfig
+  namespace: {{ $.Release.Namespace }}
+spec:
+  chain:
+    middlewares:
+    - name: {{ .username }}-basicauth
+    - name: {{ .username }}-rewrite-kubeconfig
 {{- end }}
