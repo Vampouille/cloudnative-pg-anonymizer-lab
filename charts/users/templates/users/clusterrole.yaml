@@ -23,4 +23,5 @@ rules:
   # CNPG cluster-scoped visibility
   - apiGroups: ["postgresql.cnpg.io"]
     resources: ["clusters", "scheduledbackups", "backups", "poolers"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["*"]
+  
