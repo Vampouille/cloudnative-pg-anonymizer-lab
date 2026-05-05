@@ -21,6 +21,13 @@ resourceQuota:
   requests.memory: 2Gi
   limits.cpu: "4"
   limits.memory: 4Gi
+  limitRange:
+    default:
+      cpu: "500m"
+      memory: "512Mi"
+    defaultRequest:
+      cpu: "100m"
+      memory: "128Mi"
 
 replicaCount: 1
 

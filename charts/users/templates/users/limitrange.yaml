@@ -1,0 +1,21 @@
+{{- if .Values.resourceQuota.enabled }}
+{{- range .Values.users }}
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ .username }}
+  namespace: {{ .username }}
+  labels:
+    {{- include "users.labels" $ | nindent 4 }}
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: {{ index $.Values.resourceQuota.limitRange.default "cpu" | quote }}
+        memory: {{ index $.Values.resourceQuota.limitRange.default "memory" | quote }}
+      defaultRequest:
+        cpu: {{ index $.Values.resourceQuota.limitRange.defaultRequest "cpu" | quote }}
+        memory: {{ index $.Values.resourceQuota.limitRange.defaultRequest "memory" | quote }}
+{{- end }}
+{{- end }}
