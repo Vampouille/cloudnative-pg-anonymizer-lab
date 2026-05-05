@@ -12,9 +12,9 @@ namespaceSecurity:
 
 resourceQuota:
   enabled: true
-  pods: "10"
-  services: "5"
-  persistentvolumeclaims: "5"
+  pods: "20"
+  services: "20"
+  persistentvolumeclaims: "20"
   secrets: "20"
   configmaps: "20"
   requests.cpu: "2"
