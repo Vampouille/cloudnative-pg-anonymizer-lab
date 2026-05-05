@@ -1,0 +1,19 @@
+deployment:
+  replicaCount: 1
+
+garage:
+  replicationFactor: "1"
+  s3:
+    api:
+      region: garage
+      rootDomain: ""
+    web:
+      rootDomain: ""
+
+persistence:
+  meta:
+    size: 1Gi
+    storageClass: "sbs-5k"
+  data:
+    size: 50Gi
+    storageClass: "sbs-5k"
