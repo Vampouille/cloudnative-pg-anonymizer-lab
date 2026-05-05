@@ -1,0 +1,21 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: init-sql
+spec:
+  instances: 3
+  storage:
+    size: 2Gi
+  bootstrap:
+    initdb:
+      #database: app
+      #owner: app
+      #dataChecksums: true
+      postInitSQL:
+        - |
+          CREATE TABLE people AS
+              SELECT  153478       AS id,
+                      'Sarah'      AS firstname,
+                      'Conor'      AS lastname,
+                      '0609110911' AS phone
