@@ -230,7 +230,7 @@ Move-Item kubectl-cnpg.exe "$Env:USERPROFILE\bin\"</code></pre>
             <pre><code class="language-bash">kubectl cnpg version</code></pre>
 
             <div class="callout-tip p-3 rounded">
-              <strong>Tip:</strong> Once installed, run <code>kubectl cnpg status cluster-primary</code>
+              <strong>Tip:</strong> Once installed, run <code>kubectl cnpg status prod</code>
               to get a human-readable overview of your cluster's health, primary instance, and replication lag.
             </div>
           </div>
@@ -349,7 +349,7 @@ kubectl delete pod -l "app.kubernetes.io/managed-by=cloudnative-pg"</code></pre>
             <h6>1. Inspect ClusterImageCatalog</h6>
             <pre><code class="language-bash">kubectl describe clusterimagecatalog</code></pre>
 
-            <h6>2. Cleanup previous cluster</h6>
+            <h6>2. Clean up the previous cluster</h6>
             <pre><code class="language-bash">kubectl delete cluster prod</code></pre>
 
             <h6>3. Deploy a new cluster with PostgreSQL Anonymizer</h6>
@@ -520,7 +520,7 @@ kubectl get pod --watch</code></pre>
               <li><code>prod-replication</code> – certificate for streaming replication authentication</li>
             </ul>
 
-            <h6>2. Try a connection with the default applicative role <code>app</code></h6>
+            <h6>2. Try a connection with the default application role <code>app</code></h6>
             <pre><code class="language-bash">export PROD_APP_URI=$(kubectl get secret prod-app -o jsonpath='{.data.uri}' | base64 -d)
 echo ${PROD_APP_URI}
 kubectl run psql --rm -it --image=ghcr.io/camptocamp/postgres:18 --restart=Never -- psql $PROD_APP_URI</code></pre>
@@ -569,6 +569,16 @@ spec:
       key: ca.crt</code></pre>
 
             <pre><code class="language-bash">kubectl apply -f lab4.yaml</code></pre>
+
+            <h6>5. Promote the replica cluster</h6>
+            <p>Once the cluster is ready, check its recovery state then promote it:</p>
+            <pre><code class="language-bash">kubectl cnpg psql prod-copy-blue -- -c "SELECT pg_is_in_recovery()"
+kubectl patch cluster prod-copy-blue --type='merge' -p '{"spec":{"replica":{"enabled":false}}}'
+kubectl cnpg psql prod-copy-blue -- -c "SELECT pg_is_in_recovery()"</code></pre>
+
+            <h6>6. Apply static masking</h6>
+            <p>Finally, destroy sensitive information by applying static masking:</p>
+            <pre><code class="language-sql">SELECT anon.anonymize_database()</code></pre>
           </div>
         </div>
       </div>
