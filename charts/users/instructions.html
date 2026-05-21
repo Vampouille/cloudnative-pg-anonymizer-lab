@@ -127,13 +127,13 @@
     <!-- data-bs-parent enforces one-open-at-a-time -->
     <div class="accordion" id="workshopAccordion">
 
-      <!-- ── Step 0 ── -->
+      <!-- ── Step 1 ── -->
       <div class="accordion-item">
         <h2 class="accordion-header">
           <button class="accordion-button" type="button"
                   data-bs-toggle="collapse" data-bs-target="#step0"
                   aria-expanded="true" aria-controls="step0">
-            Step 0 – Connect to the Kubernetes Cluster
+            Step 1 – Connect to the Kubernetes Cluster
           </button>
         </h2>
         <div id="step0" class="accordion-collapse collapse show"
@@ -178,13 +178,72 @@ winget install Kubernetes.kubectl</code></pre>
         </div>
       </div>
 
-      <!-- ── Step 1 ── -->
+      <!-- ── Step 2 ── -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#step0b"
+                  aria-expanded="false" aria-controls="step0b">
+            Step 2 – Install the kubectl-cnpg plugin
+          </button>
+        </h2>
+        <div id="step0b" class="accordion-collapse collapse"
+             data-bs-parent="#workshopAccordion">
+          <div class="accordion-body">
+            <div class="callout-goal p-3 rounded mb-3">
+              <strong>Goal:</strong> Install the <code>kubectl-cnpg</code> plugin (v1.29.0) to interact with CloudNativePG clusters via <code>kubectl</code>.
+            </div>
+
+            <p>
+              Download the archive for your platform from the
+              <a href="https://github.com/cloudnative-pg/cloudnative-pg/releases/tag/v1.29.0" target="_blank">GitHub release page</a>,
+              extract it and place the binary in your <code>PATH</code>.
+            </p>
+
+            <h6>Linux (amd64)</h6>
+            <pre><code class="language-bash">curl -LO https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v1.29.0/kubectl-cnpg_1.29.0_linux_x86_64.tar.gz
+tar xzf kubectl-cnpg_1.29.0_linux_x86_64.tar.gz kubectl-cnpg
+chmod +x kubectl-cnpg && sudo mv kubectl-cnpg /usr/local/bin/</code></pre>
+
+            <h6>Linux (arm64)</h6>
+            <pre><code class="language-bash">curl -LO https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v1.29.0/kubectl-cnpg_1.29.0_linux_arm64.tar.gz
+tar xzf kubectl-cnpg_1.29.0_linux_arm64.tar.gz kubectl-cnpg
+chmod +x kubectl-cnpg && sudo mv kubectl-cnpg /usr/local/bin/</code></pre>
+
+            <h6>macOS (Apple Silicon)</h6>
+            <pre><code class="language-bash">curl -LO https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v1.29.0/kubectl-cnpg_1.29.0_darwin_arm64.tar.gz
+tar xzf kubectl-cnpg_1.29.0_darwin_arm64.tar.gz kubectl-cnpg
+chmod +x kubectl-cnpg && sudo mv kubectl-cnpg /usr/local/bin/</code></pre>
+
+            <h6>macOS (Intel)</h6>
+            <pre><code class="language-bash">curl -LO https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v1.29.0/kubectl-cnpg_1.29.0_darwin_x86_64.tar.gz
+tar xzf kubectl-cnpg_1.29.0_darwin_x86_64.tar.gz kubectl-cnpg
+chmod +x kubectl-cnpg && sudo mv kubectl-cnpg /usr/local/bin/</code></pre>
+
+            <h6>Windows (x86_64 – PowerShell)</h6>
+            <pre><code class="language-powershell">Invoke-WebRequest -Uri https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v1.29.0/kubectl-cnpg_1.29.0_windows_x86_64.tar.gz -OutFile kubectl-cnpg.tar.gz
+tar xzf kubectl-cnpg.tar.gz kubectl-cnpg.exe
+# Move kubectl-cnpg.exe to a directory in your PATH, e.g.:
+Move-Item kubectl-cnpg.exe "$Env:USERPROFILE\bin\"</code></pre>
+
+            <p>Verify the installation:</p>
+            <pre><code class="language-bash">kubectl cnpg version</code></pre>
+
+            <div class="callout-tip p-3 rounded">
+              <strong>Tip:</strong> Once installed, run <code>kubectl cnpg status cluster-primary</code>
+              to get a human-readable overview of your cluster's health, primary instance, and replication lag.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Step 3 ── -->
       <div class="accordion-item">
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button"
                   data-bs-toggle="collapse" data-bs-target="#step1"
                   aria-expanded="false" aria-controls="step1">
-            Step 1 – Kubernetes Dashboard
+            Step 3 – Kubernetes Dashboard
           </button>
         </h2>
         <div id="step1" class="accordion-collapse collapse"
@@ -219,119 +278,297 @@ winget install Kubernetes.kubectl</code></pre>
         </div>
       </div>
 
-      <!-- ── Exercise 1 ── -->
+      <!-- ── Lab 1 ── -->
       <div class="accordion-item">
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#ex1"
-                  aria-expanded="false" aria-controls="ex1">
-            Exercise 1 – Create a CloudNativePG Cluster
+                  data-bs-toggle="collapse" data-bs-target="#lab1"
+                  aria-expanded="false" aria-controls="lab1">
+            Lab 1 – Deploy a Cluster
           </button>
         </h2>
-        <div id="ex1" class="accordion-collapse collapse"
+        <div id="lab1" class="accordion-collapse collapse"
              data-bs-parent="#workshopAccordion">
           <div class="accordion-body">
             <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Deploy a 3-instance PostgreSQL cluster managed by CloudNativePG.
+              <strong>Goal:</strong> Deploy a 3-instance PostgreSQL cluster managed by CloudNativePG, explore the created resources and test failover.
             </div>
 
-            <p>Create the following manifest and apply it:</p>
+            <h6>1. Create a cluster</h6>
+            <p>In a new folder, create a <code>lab1.yaml</code> file with:</p>
             <pre><code class="language-yaml">apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: cluster-primary
-  namespace: __USERNAME__
+  name: prod
 spec:
   instances: 3
   storage:
-    size: 1Gi
-  # TODO: add your configuration here</code></pre>
+    size: 2Gi</code></pre>
 
-            <pre><code class="language-bash">kubectl apply -f cluster-primary.yaml</code></pre>
+            <p>Deploy the manifest:</p>
+            <pre><code class="language-bash">kubectl apply -f lab1.yaml</code></pre>
 
-            <p>Wait for the cluster to be ready:</p>
-            <pre><code class="language-bash">kubectl get cluster cluster-primary -w</code></pre>
+            <h6>2. Inspect Kubernetes objects</h6>
+            <pre><code class="language-bash">kubectl get pod,service,secret,pvc -l "app.kubernetes.io/managed-by=cloudnative-pg"</code></pre>
 
-            <div class="callout-tip p-3 rounded">
-              <strong>Tip:</strong> <!-- Add hints or links to documentation here -->
-            </div>
+            <h6>3. Check cluster status</h6>
+            <pre><code class="language-bash">kubectl get cluster
+kubectl cnpg status prod # check timeline: 1</code></pre>
+
+            <h6>4. Connect to the cluster</h6>
+            <pre><code class="language-bash">kubectl cnpg psql prod</code></pre>
+
+            <h6>5. Kill replica or primary</h6>
+            <pre><code class="language-bash">kubectl delete pod prod-3 # kill a replica
+
+kubectl delete pod prod-1 # kill the primary
+kubectl cnpg status prod  # notice timeline increment: 2
+
+# Kill all cluster pods
+kubectl delete pod -l "app.kubernetes.io/managed-by=cloudnative-pg"</code></pre>
           </div>
         </div>
       </div>
 
-      <!-- ── Exercise 2 ── -->
+      <!-- ── Lab 2 ── -->
       <div class="accordion-item">
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#ex2"
-                  aria-expanded="false" aria-controls="ex2">
-            Exercise 2 – Create a Replica Cluster
+                  data-bs-toggle="collapse" data-bs-target="#lab2"
+                  aria-expanded="false" aria-controls="lab2">
+            Lab 2 – PostgreSQL Anonymizer
           </button>
         </h2>
-        <div id="ex2" class="accordion-collapse collapse"
+        <div id="lab2" class="accordion-collapse collapse"
              data-bs-parent="#workshopAccordion">
           <div class="accordion-body">
             <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Deploy a second cluster as a streaming replica of <code>cluster-primary</code>.
+              <strong>Goal:</strong> Deploy a cluster with the PostgreSQL Anonymizer extension and define masking rules on sensitive data.
             </div>
 
+            <h6>1. Inspect ClusterImageCatalog</h6>
+            <pre><code class="language-bash">kubectl describe clusterimagecatalog</code></pre>
+
+            <h6>2. Cleanup previous cluster</h6>
+            <pre><code class="language-bash">kubectl delete cluster prod</code></pre>
+
+            <h6>3. Deploy a new cluster with PostgreSQL Anonymizer</h6>
+            <p>Create a file <code>prod-anon.yaml</code>:</p>
+            <pre><code class="language-yaml">---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: prod
+spec:
+  instances: 3
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ClusterImageCatalog
+    name: camptocamp
+    major: 18
+  postgresGID: 999 # initdb: could not look up effective user ID 26: user does not exist
+  postgresUID: 999
+  postgresql:
+    pg_hba:
+      - host all all all trust
+      - host replication all all trust
+  storage:
+    size: 2Gi
+  bootstrap:
+    initdb:
+      postInitSQL:
+        - |
+          ALTER DATABASE postgres
+            SET session_preload_libraries = 'anon';
+          CREATE EXTENSION anon;
+          ALTER DATABASE postgres
+            SET anon.transparent_dynamic_masking TO true;</code></pre>
+
+            <pre><code class="language-bash">kubectl apply -f prod-anon.yaml</code></pre>
+
+            <h6>4. Create a <code>people</code> table</h6>
+            <pre><code class="language-bash">kubectl cnpg psql prod</code></pre>
+            <pre><code class="language-sql">CREATE TABLE people AS
+    SELECT  153478       AS id,
+            'Sarah'      AS firstname,
+            'Conor'      AS lastname,
+            '0609110911' AS phone;</code></pre>
+
+            <h6>5. Define masking rules</h6>
+            <pre><code class="language-sql">SECURITY LABEL FOR anon ON COLUMN people.lastname
+  IS 'MASKED WITH FUNCTION anon.dummy_last_name()';
+
+SECURITY LABEL FOR anon ON COLUMN people.phone
+  IS 'MASKED WITH FUNCTION anon.partial(phone,2,$$******$$,2)';</code></pre>
+
+            <h6>6. Create a masked user</h6>
+            <pre><code class="language-sql">CREATE ROLE skynet LOGIN;
+
+SECURITY LABEL FOR anon ON ROLE skynet IS 'MASKED';
+
+GRANT pg_read_all_data to skynet;</code></pre>
+
+            <h6>7. Connect with the <code>skynet</code> role</h6>
+            <pre><code class="language-bash">kubectl cnpg psql prod -- -h localhost --username skynet postgres</code></pre>
+
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Note:</strong> The <code>local</code> policy in <code>pg_hba.conf</code> is managed by CNPG so
+              <code>peer</code> connection cannot be used for the <code>skynet</code> role.
+            </div>
+
+            <h6>8. Inspect data</h6>
+            <pre><code class="language-sql">TABLE people;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Lab 3 ── -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#lab3"
+                  aria-expanded="false" aria-controls="lab3">
+            Lab 3 – Bootstrap Data
+          </button>
+        </h2>
+        <div id="lab3" class="accordion-collapse collapse"
+             data-bs-parent="#workshopAccordion">
+          <div class="accordion-body">
+            <div class="callout-goal p-3 rounded mb-3">
+              <strong>Goal:</strong> Create a new cluster bootstrapped from a <code>pg_dump</code> with a masked role.
+            </div>
+
+            <h6>1. Create the cluster definition</h6>
+            <p>Create a <code>lab3.yaml</code> file with a new Cluster definition compatible with PostgreSQL Anonymizer:</p>
             <pre><code class="language-yaml">apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: cluster-replica
-  namespace: __USERNAME__
+  name: prod-copy-green
 spec:
-  instances: 2
+  instances: 1
   storage:
-    size: 1Gi
-  replica:
-    enabled: true
-    source: cluster-primary
-  externalClusters:
-    - name: cluster-primary
+    size: 2Gi
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ClusterImageCatalog
+    name: camptocamp
+    major: 18
+  postgresGID: 999 # initdb: could not look up effective user ID 26: user does not exist
+  postgresUID: 999</code></pre>
+
+            <h6>2. Inspect services of the <code>prod</code> cluster</h6>
+            <p>Because <code>pg_dump</code> needs to acquire a lock, we will use the <code>prod-rw</code> endpoint.
+               We will use the masked role <code>skynet</code> for data extraction.</p>
+            <pre><code class="language-bash">kubectl get service -l 'cnpg.io/cluster=prod'</code></pre>
+
+            <h6>3. Add the <code>externalClusters</code> section</h6>
+            <pre><code class="language-yaml">  externalClusters:
+    - name: prod
       connectionParameters:
-        host: cluster-primary-rw.__USERNAME__.svc
-        user: streaming_replica
-        dbname: postgres
-      # TODO: add the secret reference for replication credentials</code></pre>
+        host: prod-rw
+        user: skynet
+        dbname: postgres</code></pre>
 
-            <pre><code class="language-bash">kubectl apply -f cluster-replica.yaml
-kubectl get cluster cluster-replica -w</code></pre>
+            <h6>4. Add the <code>bootstrap</code> section</h6>
+            <pre><code class="language-yaml">  bootstrap:
+    initdb:
+      import:
+        type: monolith
+        databases:
+          - postgres
+        source:
+          externalCluster: prod
+        pgDumpExtraOptions:
+          - --no-owner
+          - --no-privileges</code></pre>
 
-            <div class="callout-tip p-3 rounded">
-              <strong>Tip:</strong> <!-- Add hints about replication secrets here -->
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Tip:</strong> The <code>pg_dump</code> options ensure that there are no errors related to missing roles.
             </div>
+
+            <h6>5. Deploy the cluster</h6>
+            <pre><code class="language-bash">kubectl apply -f lab3.yaml
+kubectl get pod --watch</code></pre>
+
+            <p>A <code>prod-copy-green-init</code> pod is responsible for launching <code>initdb</code> and then <code>pg_dump</code>/<code>pg_restore</code>.</p>
           </div>
         </div>
       </div>
 
-      <!-- ── Exercise 3 ── -->
+      <!-- ── Lab 4 ── -->
       <div class="accordion-item">
         <h2 class="accordion-header">
           <button class="accordion-button collapsed" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#ex3"
-                  aria-expanded="false" aria-controls="ex3">
-            Exercise 3 – Promote the Replica Cluster
+                  data-bs-toggle="collapse" data-bs-target="#lab4"
+                  aria-expanded="false" aria-controls="lab4">
+            Lab 4 – Replica Pool
           </button>
         </h2>
-        <div id="ex3" class="accordion-collapse collapse"
+        <div id="lab4" class="accordion-collapse collapse"
              data-bs-parent="#workshopAccordion">
           <div class="accordion-body">
             <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Promote <code>cluster-replica</code> to become a standalone primary.
+              <strong>Goal:</strong> Create a standalone replica cluster of <code>prod</code>, promote the cluster and apply static masking.
             </div>
 
-            <pre><code class="language-bash">kubectl patch cluster cluster-replica \
-  --type=merge \
-  -p '{"spec":{"replica":{"enabled":false}}}'</code></pre>
+            <h6>1. Inspect replication secrets created by the <code>prod</code> cluster</h6>
+            <pre><code class="language-bash">kubectl get secret -l app.kubernetes.io/managed-by=cloudnative-pg</code></pre>
+            <ul>
+              <li><code>prod-app</code> – credentials for the <code>app</code> role (user, password, URI)</li>
+              <li><code>prod-ca</code> – certificate authority for servers and certificate-based roles</li>
+              <li><code>prod-server</code> – server certificate</li>
+              <li><code>prod-replication</code> – certificate for streaming replication authentication</li>
+            </ul>
 
-            <p>Verify that <code>cluster-replica</code> now has its own primary instance:</p>
-            <pre><code>kubectl get cluster cluster-replica
-kubectl get pods -l cnpg.io/cluster=cluster-replica</code></pre>
+            <h6>2. Try a connection with the default applicative role <code>app</code></h6>
+            <pre><code class="language-bash">export PROD_APP_URI=$(kubectl get secret prod-app -o jsonpath='{.data.uri}' | base64 -d)
+echo ${PROD_APP_URI}
+kubectl run psql --rm -it --image=ghcr.io/camptocamp/postgres:18 --restart=Never -- psql $PROD_APP_URI</code></pre>
 
-            <div class="callout-tip p-3 rounded">
-              <strong>Tip:</strong> <!-- Add notes about what happens to the original primary here -->
-            </div>
+            <h6>3. Inspect the replication secret</h6>
+            <pre><code class="language-bash">kubectl get secret prod-replication -o yaml</code></pre>
+
+            <h6>4. Create the replica cluster</h6>
+            <p>Create a file <code>lab4.yaml</code>:</p>
+            <pre><code class="language-yaml">---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: prod-copy-blue
+spec:
+  instances: 1
+  storage:
+    size: 2Gi
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ClusterImageCatalog
+    name: camptocamp
+    major: 18
+  postgresGID: 999
+  postgresUID: 999
+  replica:
+    enabled: true
+    source: prod
+  bootstrap:
+    pg_basebackup:
+      source: prod
+  externalClusters:
+  - name: prod
+    connectionParameters:
+      host: prod-rw
+      user: streaming_replica
+      sslmode: verify-full
+    sslKey:
+      name: prod-replication
+      key: tls.key
+    sslCert:
+      name: prod-replication
+      key: tls.crt
+    sslRootCert:
+      name: prod-ca
+      key: ca.crt</code></pre>
+
+            <pre><code class="language-bash">kubectl apply -f lab4.yaml</code></pre>
           </div>
         </div>
       </div>
