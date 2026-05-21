@@ -27,7 +27,6 @@ TOKEN_WAIT_SECONDS="${TOKEN_WAIT_SECONDS:-60}"
 
 log()  { echo "[setup-users] $*"; }
 die()  { echo "[setup-users] ERROR: $*" >&2; exit 1; }
-garage() { kubectl exec -n "${GARAGE_NAMESPACE}" sts/garage -c garage -- /garage "$@"; }
 
 # --------------------------------------------------------------------------
 # 0. Preflight checks
@@ -133,77 +132,6 @@ EOF
   
   chmod 600 "${TMPDIR_HTML}/${USERNAME}.html"
   log "    instructions...OK"
-
-  BUCKET_NAME="${USERNAME}-backup"
-  API_KEY_NAME="${USERNAME}-backup-key"
-
-  # Bucket
-  if ! garage bucket info "${BUCKET_NAME}" &>/dev/null; then
-    log "    Creating bucket '${BUCKET_NAME}'"
-    garage bucket create "${BUCKET_NAME}"
-  else
-    log "    Bucket '${BUCKET_NAME}' already exists — skipping"
-  fi
-
-  # API key
-  if ! garage key info "${API_KEY_NAME}" &>/dev/null; then
-    log "    Creating API key '${API_KEY_NAME}'"
-    garage key create "${API_KEY_NAME}" > /dev/null
-  else
-    log "    API key '${API_KEY_NAME}' already exists — skipping"
-  fi
-
-  # Permissions (idempotent)
-  garage bucket allow --read --write --owner "${BUCKET_NAME}" --key "${API_KEY_NAME}" >/dev/null
-
-  # Retrieve credentials
-  ACCESS_KEY_ID=$(garage key info "${API_KEY_NAME}" 2>/dev/null \
-    | grep 'Key ID:' | awk '{print $3}')
-  ACCESS_SECRET_KEY=$(garage key info --show-secret "${API_KEY_NAME}" 2>/dev/null \
-    | grep 'Secret key:' | awk '{print $3}')
-
-  [[ -z "${ACCESS_KEY_ID}" ]]     && die "Could not retrieve Access Key ID for ${USERNAME}"
-  [[ -z "${ACCESS_SECRET_KEY}" ]] && die "Could not retrieve Secret Key for ${USERNAME}"
-
-  # Kubernetes secret (create or update — idempotent via dry-run + apply)
-  log "    Injecting secret '${SECRET_NAME}' in namespace '${USERNAME}'"
-  kubectl create secret generic "${USERNAME}-barman-backup" \
-    --namespace "${USERNAME}" \
-    --from-literal=AWS_ACCESS_KEY_ID="${ACCESS_KEY_ID}" \
-    --from-literal=AWS_SECRET_ACCESS_KEY="${ACCESS_SECRET_KEY}" \
-    --from-literal=AWS_ENDPOINT_URL="http://garage.${GARAGE_NAMESPACE}.svc.cluster.local:3900" \
-    --from-literal=AWS_DEFAULT_REGION=garage \
-    --from-literal=BUCKET_NAME="${BUCKET_NAME}" \
-    --dry-run=client -o yaml \
-    | kubectl apply -f -
-  log "    Secret injected."
-
-  # Configure CNPG ObjectStore
-  kubectl apply -f - <<EOF
-apiVersion: barmancloud.cnpg.io/v1
-kind: ObjectStore
-metadata:
-  name: ${USERNAME}-garage-store
-  namespace: ${USERNAME}
-spec:
-  configuration:
-    destinationPath: s3://${BUCKET_NAME}/
-    endpointURL: http://garage.${GARAGE_NAMESPACE}.svc.cluster.local:3900
-    s3Credentials:
-      accessKeyId:
-        name: ${USERNAME}-barman-backup
-        key: AWS_ACCESS_KEY_ID
-      secretAccessKey:
-        name: ${USERNAME}-barman-backup
-        key: AWS_SECRET_ACCESS_KEY
-      region:
-        name: ${USERNAME}-barman-backup
-        key: AWS_DEFAULT_REGION
-    wal:
-      compression: gzip
-    data:
-      immediateCheckpoint: true
-EOF
 
 done
 
