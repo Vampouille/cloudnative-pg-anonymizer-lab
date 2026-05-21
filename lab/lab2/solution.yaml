@@ -1,0 +1,38 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: prod
+spec:
+  instances: 3
+  # ------ Use custom image -------------
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ClusterImageCatalog
+    name: camptocamp
+    major: 18
+  postgresGID: 999 # initdb: could not look up effective user ID 26: user does not exist
+  postgresUID: 999
+  # -------------------------------------
+  postgresql:
+    pg_hba:
+      - host all all all trust
+      - host replication all all trust
+  storage:
+    size: 2Gi
+  bootstrap:
+    initdb:
+      postInitSQL:
+        - |
+          ALTER DATABASE postgres
+            SET session_preload_libraries = 'anon';
+          CREATE EXTENSION anon;
+          ALTER DATABASE postgres
+            SET anon.transparent_dynamic_masking TO true;
+...
+
+CREATE TABLE people AS
+    SELECT  153478       AS id,
+            'Sarah'      AS firstname,
+            'Conor'      AS lastname,
+            '0609110911' AS phone;

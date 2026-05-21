@@ -1,0 +1,25 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pg-dump
+spec:
+  instances: 1
+  storage:
+    size: 2Gi
+  bootstrap:
+    initdb:
+      import:
+        type: monolith
+        databases:
+          - app
+        roles:
+          - app
+        source:
+          externalCluster: upstream
+  externalClusters:
+    - name: upstream
+      connectionParameters:
+        host: init-sql-rw
+        user: postgres
+        dbname: app

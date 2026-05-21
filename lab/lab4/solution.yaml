@@ -1,0 +1,38 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: prod-copy-blue
+spec:
+  instances: 1
+  storage:
+    size: 2Gi
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ClusterImageCatalog
+    name: camptocamp
+    major: 18
+  postgresGID: 999
+  postgresUID: 999
+  replica:
+    enabled: true
+    source: prod
+  bootstrap:
+    pg_basebackup:
+      source: prod
+  externalClusters:
+  - name: prod
+    connectionParameters:
+      host: prod-rw
+      user: streaming_replica
+      sslmode: verify-full
+    sslKey:
+      name: prod-replication
+      key: tls.key
+    sslCert:
+      name: prod-replication
+      key: tls.crt
+    sslRootCert:
+      name: prod-ca
+      key: ca.crt
+...

@@ -1,0 +1,23 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: init-sql
+spec:
+  instances: 3
+  storage:
+    size: 2Gi
+  postgresql:
+    pg_hba:
+      - host all all all trust
+      - host replication all all trust
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+      postInitApplicationSQL:
+        - |
+          CREATE TABLE vegetables AS
+              SELECT  1          AS id,
+                      'broccoli' AS name;
+          ALTER TABLE vegetables OWNER TO app;

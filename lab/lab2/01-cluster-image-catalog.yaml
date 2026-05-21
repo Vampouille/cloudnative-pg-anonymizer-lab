@@ -1,0 +1,17 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ClusterImageCatalog
+metadata:
+  name: camptocamp
+spec:
+  images:
+    - major: 14
+      image: ghcr.io/camptocamp/postgres:14
+    - major: 15
+      image: ghcr.io/camptocamp/postgres:15
+    - major: 16
+      image: ghcr.io/camptocamp/postgres:16
+    - major: 17
+      image: ghcr.io/camptocamp/postgres:17
+    - major: 18
+      image: ghcr.io/camptocamp/postgres:18

@@ -8,11 +8,8 @@ export PGHOST=127.0.0.1
 export PGPASSWORD=pgpass
 export PGUSER=postgres
 
-for sql in $(ls 04.*.sql); do
+for sql in $(ls *.sql); do
   bat $sql
   read
   cat $sql | psql
 done
-#bat 04.1-create-table.sql
-#read
-#cat 04.1-create-table.sql | psql

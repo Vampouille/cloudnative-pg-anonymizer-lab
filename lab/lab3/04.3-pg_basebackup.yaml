@@ -1,0 +1,18 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pg-basebackup
+spec:
+  instances: 1
+  storage:
+    size: 2Gi
+  bootstrap:
+    pg_basebackup:
+      source: upstream
+  externalClusters:
+    - name: upstream
+      connectionParameters:
+        host: init-sql-rw
+        user: postgres
+        dbname: app
