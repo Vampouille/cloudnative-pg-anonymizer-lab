@@ -586,6 +586,18 @@ kubectl cnpg psql prod-copy-blue -- -c "SELECT pg_is_in_recovery()"</code></pre>
     </div><!-- /accordion -->
   </main>
 
+  <script>
+    /* ── Dynamic username substitution ──
+       Runs synchronously before Bootstrap/hljs load, so no event listeners
+       are broken by the innerHTML replacement.
+       Extracts the first subdomain: user1.campto.camp → "user1"          */
+    (function () {
+      var username = window.location.hostname.split('.')[0];
+      document.title = document.title.replace('__USERNAME__', username);
+      document.body.innerHTML = document.body.innerHTML.replaceAll('__USERNAME__', username);
+    })();
+  </script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script>
   <script>
