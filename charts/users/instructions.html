@@ -56,7 +56,7 @@
        STICKY NAVBAR  (Bootstrap)
   ══════════════════════════════════════════════════════════════ -->
   <nav class="navbar navbar-dark bg-dark fixed-top px-3 gap-2">
-    <span class="navbar-brand me-2">&#9714; CNPG Workshop</span>
+    <span class="navbar-brand me-2">&#9714; Workshop: PostgreSQL Anonymizer & CloudNativePG</span>
 
     <a class="btn btn-sm btn-primary"
        href="https://__USERNAME__.campto.camp/kubeconfig" download="kubeconfig">
@@ -75,11 +75,15 @@
 
     <div class="d-flex gap-2 ms-auto">
       <a class="btn btn-sm btn-outline-light"
-         href="https://cloudnative-pg.io/documentation/current/" target="_blank">&#128218; CNPG Docs</a>
+         href="https://cloudnative-pg.io/docs/1.29/" target="_blank">&#128218; CNPG Docs</a>
+      <a class="btn btn-sm btn-outline-light"
+         href="https://cloudnative-pg.io/docs/1.29/cloudnative-pg.v1" target="_blank">&#128218; CNPG API Docs</a>
+      <a class="btn btn-sm btn-outline-light"
+         href="https://postgresql-anonymizer.readthedocs.io/en/stable/" target="_blank">&#128218; PostgreSQL Anonymizer Docs</a>
       <a class="btn btn-sm btn-outline-light"
          href="__SLIDES_PDF_URL__" target="_blank">&#128196; Slides</a>
       <a class="btn btn-sm btn-outline-light"
-         href="__GIT_REPO_URL__" target="_blank">&#128279; Git repo</a>
+         href="https://github.com/Vampouille/cloudnative-pg-anonymizer-lab/" target="_blank">&#128279; Git repo</a>
     </div>
   </nav>
 
@@ -118,10 +122,10 @@
   ══════════════════════════════════════════════════════════════ -->
   <main class="container" style="max-width:860px; padding: 2rem 1rem 4rem;">
 
-    <h1 class="border-bottom pb-2 mb-2">Workshop CloudNativePG &amp; pg_anonymizer</h1>
     <div class="alert alert-info py-2 mb-4">
       Participant: <strong>__USERNAME__</strong> &nbsp;|&nbsp;
-      Namespace: <code>__USERNAME__</code>
+      Namespace: <code>__USERNAME__</code> &nbsp;|&nbsp;
+      Password: <strong>__PASSWORD__</strong>
     </div>
 
     <!-- data-bs-parent enforces one-open-at-a-time -->
@@ -645,6 +649,19 @@ kubectl cnpg psql prod-copy-blue -- -c "SELECT pg_is_in_recovery()"</code></pre>
 
       /* Run highlight.js */
       hljs.highlightAll();
+
+      /* ── Fetch password and replace __PASSWORD__ in hrefs and text nodes ── */
+      fetch('/password')
+        .then(function (r) { return r.text(); })
+        .then(function (pw) {
+          pw = pw.trim();
+          document.querySelectorAll('a[href*="__PASSWORD__"]').forEach(function (a) {
+            a.href = a.getAttribute('href').replace(/__PASSWORD__/g, pw);
+          });
+          document.querySelectorAll('strong').forEach(function (el) {
+            if (el.textContent === '__PASSWORD__') el.textContent = pw;
+          });
+        });
     });
 
     /* ── Fetch token, copy to clipboard and open modal ── */
