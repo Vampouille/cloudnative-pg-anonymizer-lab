@@ -1,17 +1,10 @@
-* Add favicon
-* Fix "not secure website" when browsing on https://user1.campto.camp/
 * Simplify instructions for kubectl installation
 * Improve integration with existing kubeconfig, try to import downloaded kubeconfig into ~/.kube/config with a fency kubectl command. Add slides to warn about already existing ~/kube/config (create 2 scenario: with or without default kubeconfig)
-* fix revoke old kubeconfig on each terragrunt apply: the setup-user.sh script seems to invalidate the kubeconfig on each run
-* Add link to the CNPG API docs  https://cloudnative-pg.io/docs/1.28/cloudnative-pg.v1
-* Use a unique HTML page/file for each participants but adapt placeholder using
-  javascript using the URL as source: *user1*.campto.camp, token can be download
-  by js using xhr: user1.campto.camp/token
-* simplify token copy: button should copy token to clipboard instead of
-  displaying the token
 * lab2: during presentation show, label usage for primary: cnpg.io/instanceRole: primary, a lifecycle of instance linked to a imagecatalog
 * lab1: during presentation show 'ready status': define micro lb config: prod-r,
   prod-ro, prod-rw
+* fix copy function that remove leading spaces
+
 
 # Instructions
 
@@ -231,15 +224,14 @@ Finally, we will define the `bootstrap` section :
         pgDumpExtraOptions:
           - --no-owner
           - --no-privileges
-...
-
-
+```
 The `pg_dump` options ensure that there is no error related to missing role.
 
 The cluster can be deployed with:
 
 ```shell
 kubectl apply -f lab3.yaml
+kubectl get pod --watch
 ```
 
 An `prod-copy-green-init` pod is responsible of launching `initdb` and then `pg_dump`/`pg_restore` as describe.
@@ -345,4 +337,18 @@ spec:
       name: prod-ca
       key: ca.crt
 ...
+```
+
+As soon as the cluster is ready, you can promote the cluster with:
+
+```shell
+kubectl cnpg psql prod-copy-blue -- -c "SELECT pg_is_in_recovery()"
+kubectl patch cluster prod-copy-blue --type='merge' -p '{"spec":{"replica":{"enabled":false}}}'
+kubectl cnpg psql prod-copy-blue -- -c "SELECT pg_is_in_recovery()"
+```
+
+Finally, destroy sensitive information by applying static masking:
+
+```sql
+SELECT anon.anonymize_database()
 ```

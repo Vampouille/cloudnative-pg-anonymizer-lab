@@ -91,6 +91,18 @@ spec:
     middlewares:
     - name: {{ .username }}-basicauth
     - name: rewrite-instructions
+# * user1.campto.camp/favicon.ico
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: {{ .username }}-chain-favicon
+  namespace: {{ $.Release.Namespace }}
+spec:
+  chain:
+    middlewares:
+    - name: {{ .username }}-basicauth
+    - name: rewrite-favicon
 # * user1.campto.camp/kubeconfig
 ---
 kind: Middleware
