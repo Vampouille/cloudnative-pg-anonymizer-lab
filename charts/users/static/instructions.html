@@ -59,7 +59,7 @@
     <span class="navbar-brand me-2">&#9714; Workshop: PostgreSQL Anonymizer & CloudNativePG</span>
 
     <a class="btn btn-sm btn-primary"
-       href="https://__USERNAME__.campto.camp/kubeconfig" download="kubeconfig">
+       href="https://__USERNAME__.campto.camp/kubeconfig.yaml" download="kubeconfig.yaml">
       &#8659; kubeconfig
     </a>
 
@@ -171,7 +171,7 @@ winget install Kubernetes.kubectl</code></pre>
             <h6>2. Download your kubeconfig</h6>
             <p>Click the button below (or use the toolbar button), then move the file to <code>~/.kube/config</code>:</p>
             <a class="btn btn-primary btn-sm"
-               href="https://__USERNAME__.campto.camp/kubeconfig" download="kubeconfig">
+               href="https://__USERNAME__.campto.camp/kubeconfig.yaml" download="kubeconfig.yaml">
               &#8659; Download KUBECONFIG
             </a>
 
@@ -310,6 +310,11 @@ spec:
 
             <p>Deploy the manifest:</p>
             <pre><code class="language-bash">kubectl apply -f lab1.yaml</code></pre>
+
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Note:</strong> The installation of Cloud Native PG is mantory before deployment of your first cluster.
+            </div>
+
 
             <h6>2. Inspect Kubernetes objects</h6>
             <pre><code class="language-bash">kubectl get pod,service,secret,pvc -l "app.kubernetes.io/managed-by=cloudnative-pg"</code></pre>
@@ -494,6 +499,17 @@ spec:
 kubectl get pod --watch</code></pre>
 
             <p>A <code>prod-copy-green-init</code> pod is responsible for launching <code>initdb</code> and then <code>pg_dump</code>/<code>pg_restore</code>.</p>
+
+            <h6>6. Connect to the cluster</h6>
+            <pre><code class="language-bash">kubectl cnpg psql prod-copy-green</code></pre>
+
+            <h6>7. Search for personally identifiable information</h6>
+            <pre><code class="language-sql">TABLE people;</code></pre>
+
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Note:</strong> Using the <code>pg_dump</code> method, unlike previous lab, the data are now stable.
+            </div>
+
           </div>
         </div>
       </div>
@@ -581,7 +597,11 @@ kubectl cnpg psql prod-copy-blue -- -c "SELECT pg_is_in_recovery()"</code></pre>
 
             <h6>6. Apply static masking</h6>
             <p>Finally, destroy sensitive information by applying static masking:</p>
-            <pre><code class="language-sql">SELECT anon.anonymize_database()</code></pre>
+            <pre><code class="language-sql">SELECT anon.anonymize_database();</code></pre>
+
+            <h6>7. Search for personally identifiable information</h6>
+            <pre><code class="language-sql">TABLE people;</code></pre>
+
           </div>
         </div>
       </div>
