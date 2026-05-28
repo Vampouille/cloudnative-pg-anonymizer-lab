@@ -7,20 +7,6 @@ dependency "middleware" {
   skip_outputs = true
 }
 
-terraform {
-  after_hook "setup_garage" {
-    commands = ["apply"]
-    execute  = ["${get_repo_root()}/scripts/setup-garage.sh"]
-    run_on_error = false
-  }
-  
-  after_hook "setup_users" {
-    commands = ["apply"]
-    execute  = ["${get_repo_root()}/scripts/setup-users.sh"]
-    run_on_error = false
-  }
-}
-
 inputs = {
   kubeconfig = dependency.kapsule.outputs.kubeconfig
   ingress_lb = dependency.kapsule.outputs.ingress_lb

@@ -1,10 +1,20 @@
-# ── Kubernetes Dashboard (official chart, v3+) ──────────────────────────────
+resource "kubernetes_namespace" "dashboard" {
+
+  metadata {
+    annotations = {
+    "scheduler.alpha.kubernetes.io/node-selector" = "k8s.scaleway.com/project-env=infra"
+    }
+
+    name = "kubernetes-dashboard"
+  }
+}
+
 resource "helm_release" "dashboard" {
   name             = "headlamp"
   repository       = "https://kubernetes-sigs.github.io/headlamp/"
   chart            = "headlamp"
 
-  namespace        = "kubernetes-dashboard"
+  namespace        = kubernetes_namespace.dashboard.metadata[0].name
   create_namespace = true
   dependency_update = true
   atomic           = true
@@ -26,7 +36,7 @@ locals {
 resource "kubernetes_secret" "dashboard_basicauth" {
   metadata {
     name      = "dashboard-basicauth"
-    namespace = "kubernetes-dashboard"
+    namespace = kubernetes_namespace.dashboard.metadata[0].name
   }
   data = {
     users = local.dashboard_htpasswd
@@ -40,7 +50,7 @@ resource "kubernetes_manifest" "dashboard_middleware_auth" {
     kind       = "Middleware"
     metadata = {
       name      = "dashboard-basicauth"
-      namespace = "kubernetes-dashboard"
+      namespace = kubernetes_namespace.dashboard.metadata[0].name
     }
     spec = {
       basicAuth = {
