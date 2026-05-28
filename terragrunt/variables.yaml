@@ -13,6 +13,25 @@ cluster:
       node_type: DEV1-L
       root_volume_size_in_gb: 20
       root_volume_type: sbs_5k
+    # Based on the resource request and limits for each postgres pod:
+    # * request: 128Mi
+    # * limit: 256Mi
+    #
+    # Labs need 5 pods:
+    # * 3 pod for prod
+    # * 1 pod for copy-green
+    # * 1 pod for copy-blue
+    # We can add 3 to be safe
+    #
+    # So one user will need:
+    # * request: 8 * 128Mi = 1024Mi
+    # * limit: 8 * 256Mi = 2048Mi --> Define namespace limit
+    #
+    # One DEV1-L node have 6300Mi of allocable memory, so based on limit one node can host 3 users.
+    # At the end we need users/3 nodes
+    # 40 --> 14 nodes
+    # 30 --> 10 nodes
+    # 20 --> 7 nodes
     worker:
       size: 1
       tags: ["worker", "project-env=worker"]
