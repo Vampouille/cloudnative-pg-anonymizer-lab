@@ -51,7 +51,6 @@ resource "kubernetes_token_request_v1" "user" {
     namespace = kubernetes_service_account.user[each.key].metadata[0].namespace
   }
   spec {
-    audiences          = ["api"]
     expiration_seconds = 604800 # 7 days
   }
 }
@@ -87,7 +86,7 @@ resource "kubernetes_secret" "user" {
   data = {
     token    = kubernetes_token_request_v1.user[each.key].token
     password = each.value.password
-    kubeconfig = <<-EOT
+    "kubeconfig.yaml" = <<-EOT
 apiVersion: v1
 kind: Config
 clusters:
