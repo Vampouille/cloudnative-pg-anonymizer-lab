@@ -1,5 +1,27 @@
+# user1.campto.camp/ --> /static/instructions.html
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: rewrite-instructions
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replacePath:
+    path: "/static/instructions.html"
+
+# user1.campto.camp/favicon.ico --> /static/favicon.ico
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: rewrite-favicon
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replacePath:
+    path: "/static/favicon.ico"
+
 {{- range .Values.users }}
-# Basic auth for : 
+# Basic auth for :
 # * user1.campto.camp
 # * user1.campto.camp/kubeconfig
 ---
@@ -23,18 +45,7 @@ stringData:
   username: {{ .username }}
   password: {{ .password | quote }}
 
-# Rewrite Middleware for : 
-# * user1.campto.camp --> /instructions/user1-instructions.html
-# * user1.campto.camp/kubeconfig --> /kubeconfigs/user1-kubeconfig.yaml
----
-kind: Middleware
-apiVersion: traefik.io/v1alpha1
-metadata:
-  name: {{ .username }}-rewrite-instructions
-  namespace: {{ $.Release.Namespace }}
-spec:
-  replacePath:
-    path: "/instructions/{{ .username }}.html"
+# * user1.campto.camp/kubeconfig.yaml --> /user1/kubeconfig.yaml
 ---
 kind: Middleware
 apiVersion: traefik.io/v1alpha1
@@ -43,11 +54,32 @@ metadata:
   namespace: {{ $.Release.Namespace }}
 spec:
   replacePath:
-    path: "/kubeconfigs/{{ .username }}-kubeconfig.yaml"
+    path: "/{{ .username }}/kubeconfig.yaml"
 
-# Chain (rewrite + basicauth) Middleware for : 
+# * user1.campto.camp/token --> /user1/token
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: {{ .username }}-rewrite-token
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replacePath:
+    path: "/{{ .username }}/token"
+
+# * user1.campto.camp/password --> /user1/password
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: {{ .username }}-rewrite-password
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replacePath:
+    path: "/{{ .username }}/password"
+
+# Chain (rewrite + basicauth) Middleware for :
 # * user1.campto.camp
-# * user1.campto.camp/kubeconfig
 ---
 kind: Middleware
 apiVersion: traefik.io/v1alpha1
@@ -58,7 +90,8 @@ spec:
   chain:
     middlewares:
     - name: {{ .username }}-basicauth
-    - name: {{ .username }}-rewrite-instructions
+    - name: rewrite-instructions
+# * user1.campto.camp/kubeconfig
 ---
 kind: Middleware
 apiVersion: traefik.io/v1alpha1
@@ -70,4 +103,28 @@ spec:
     middlewares:
     - name: {{ .username }}-basicauth
     - name: {{ .username }}-rewrite-kubeconfig
+# * user1.campto.camp/token
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: {{ .username }}-chain-token
+  namespace: {{ $.Release.Namespace }}
+spec:
+  chain:
+    middlewares:
+    - name: {{ .username }}-basicauth
+    - name: {{ .username }}-rewrite-token
+# * user1.campto.camp/password
+---
+kind: Middleware
+apiVersion: traefik.io/v1alpha1
+metadata:
+  name: {{ .username }}-chain-password
+  namespace: {{ $.Release.Namespace }}
+spec:
+  chain:
+    middlewares:
+    - name: {{ .username }}-basicauth
+    - name: {{ .username }}-rewrite-password
 {{- end }}

@@ -56,12 +56,14 @@ spec:
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
               readOnly: true
-            - name: users-instructions
-              mountPath: /usr/share/nginx/html/instructions
+            - name: static
+              mountPath: /usr/share/nginx/html/static
               readOnly: true
-            - name: users-kubeconfigs
-              mountPath: /usr/share/nginx/html/kubeconfigs
+            {{- range .Values.users }}
+            - name: {{ .username }}
+              mountPath: /usr/share/nginx/html/{{ .username }}
               readOnly: true
+            {{- end }}
       volumes:
         - name: cache
           emptyDir: {}
@@ -72,9 +74,11 @@ spec:
         - name: nginx-conf
           configMap:
             name: {{ include "users.fullname" . }}-nginx-conf
-        - name: users-instructions
-          configMap:
-            name: {{ include "users.fullname" . }}-instructions
-        - name: users-kubeconfigs
+        - name: static
           secret:
-            secretName: {{ include "users.fullname" . }}-kubeconfigs
+            secretName: {{ include "users.fullname" . }}-static
+        {{- range .Values.users }}
+        - name: {{ .username }}
+          secret:
+            secretName: {{ .username }}
+        {{- end }}
