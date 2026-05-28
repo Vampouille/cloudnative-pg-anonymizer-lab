@@ -25,5 +25,5 @@ scaleway_project_id: "0d4603b7-bfcc-4860-87fc-a5e755efec65" # pgdays-workshop
 network_mask: "172.18.0.0/22"
 workshop_domain: "campto.camp"
 letsencrypt_email: "admin@campto.camp"
-users: 3
+users: 40
 ...
