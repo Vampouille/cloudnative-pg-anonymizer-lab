@@ -18,9 +18,9 @@ resourceQuota:
   secrets: "20"
   configmaps: "20"
   requests.cpu: "2"
-  requests.memory: 2Gi
+  requests.memory: 1Gi
   limits.cpu: "4"
-  limits.memory: 4Gi
+  limits.memory: 2Gi
   limitRange: # Postgres instances are using from 60Mi to 90Mi
     default:
       cpu: "500m"
