@@ -1,9 +1,10 @@
 {{- range .Values.users }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   name: {{ .username }}-workshop-viewer
+  namespace: {{ .username }}
   labels:
     {{- include "users.labels" $ | nindent 4 }}
 subjects:
@@ -15,3 +16,20 @@ roleRef:
   kind: ClusterRole
   name: workshop-viewer
 {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: workshop-viewer
+  labels:
+    {{- include "users.labels" $ | nindent 4 }}
+subjects:
+{{- range .Values.users }}
+  - kind: ServiceAccount
+    name: {{ .username }}
+    namespace: {{ .username }}
+{{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-workshop-viewer
