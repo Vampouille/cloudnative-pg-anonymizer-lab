@@ -1,6 +1,6 @@
 @page {
     size: A4;
-    margin: 15mm;
+    margin: 5mm;
 }
 
 * {
@@ -24,6 +24,10 @@ body {
     border-radius: 4px;
     padding: 6mm;
     break-inside: avoid;
+    background-image: url('card-background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .card-title {
