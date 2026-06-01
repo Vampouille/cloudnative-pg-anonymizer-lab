@@ -8,6 +8,10 @@ deployment:
 additionalArguments:
   - "--api.insecure=true"
 
+logs:
+  access:
+    enabled: true
+
 rbac:
   aggregateTo:
     - "admin"
