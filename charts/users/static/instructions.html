@@ -659,7 +659,7 @@ kubectl cnpg psql prod-copy-blue -- -c "SELECT pg_is_in_recovery()"</code></pre>
         btn.addEventListener('click', function () {
           var code = pre.querySelector('code');
           var text = code ? code.textContent : pre.textContent;
-          copyToClipboard(text.trim()).then(function () {
+          copyToClipboard(text).then(function () {
             btn.textContent = '✓ Copied!';
             setTimeout(function () { btn.textContent = 'Copy'; }, 2000);
           });
