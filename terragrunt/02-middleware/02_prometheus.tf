@@ -1,10 +1,5 @@
 resource "kubernetes_namespace" "prometheus" {
-
   metadata {
-    annotations = {
-    "scheduler.alpha.kubernetes.io/node-selector" = "k8s.scaleway.com/project-env=infra"
-    }
-
     name = "kube-prometheus-stack"
   }
 }
