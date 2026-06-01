@@ -37,6 +37,24 @@ body {
     margin-bottom: 3mm;
 }
 
+.footer-title {
+    font-size: 8pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #2c3e50;
+    border-bottom: 1px solid #2c3e50;
+    padding-bottom: 2mm;
+}
+
+.email {
+    font-size: 8pt;
+    color: #2c3e50;
+    word-break: break-all;
+    margin-top: 2mm;
+}
+
+
 .field {
     margin-bottom: 2mm;
 }
@@ -53,4 +71,20 @@ body {
     font-size: 8pt;
     color: #2c3e50;
     word-break: break-all;
+}
+
+.contact {
+    margin-top: 3mm;
+    border-top: 1px solid #2c3e50;
+    padding-top: 2mm;
+}
+
+.contact-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3mm;
+}
+
+.contact-person .value {
+    font-size: 7pt;
 }

@@ -11,7 +11,7 @@ ${css}  </style>
   <div class="grid">
 %{ for u in users ~}
     <div class="card">
-      <div class="card-title">Kubernetes Access</div>
+      <div class="card-title">Workshop Access</div>
       <div class="field">
         <span class="label">URL</span>
         <span class="value">${u.username}.${domain}</span>
@@ -24,6 +24,9 @@ ${css}  </style>
         <span class="label">Password</span>
         <span class="value">${u.password}</span>
       </div>
+      <div class="footer-title">Contact</div>
+      <div class="email">alain.lesage@dalibo.com</div>
+      <div class="email">julien.acroute@camptocamp.com</div>
     </div>
 %{ endfor ~}
   </div>
