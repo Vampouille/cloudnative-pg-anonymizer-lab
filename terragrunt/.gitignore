@@ -4,3 +4,5 @@ charts/
 terraform.tfstate
 terraform.tfstate.backup
 terragrunt-debug.tfvars.json
+.terragrunt-cache/
+03-app/cards.html

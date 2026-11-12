@@ -1,6 +1,6 @@
 locals {
   # One map per CSV line: { url = "user1.campto.camp", user = "user1", password = "..." }
-  users_csv = csvdecode(file("${path.module}/../${local.variables.users_csv}"))
+  users_csv = csvdecode(file("${local.variables.users_csv}"))
 
   # Values shared by all users, merged into each /data JSON
   users_common_data = try(local.variables.users_common_data, {})
@@ -118,7 +118,7 @@ EOT
 
 resource "helm_release" "this" {
   name       = "users"
-  chart      = "../../charts/users"
+  chart      = "./charts/users"
 
   namespace = kubernetes_namespace.users.metadata[0].name
   #disable_webhooks  = true
@@ -140,10 +140,12 @@ resource "helm_release" "this" {
     ingress = {
       enabled = true
     }
-    # Force redeployment when local chart files change
+    # Force redeployment when local chart files change.
+    # values-test.yaml is excluded: it is written by local_file.users_values
+    # during apply, which would change the checksum between plan and apply.
     chartChecksum = sha1(join("", [
-      for f in sort(fileset("${path.module}/../../charts/users", "**")) :
-      filesha1("${path.module}/../../charts/users/${f}")
+      for f in sort(fileset("./charts/users", "**")) :
+      filesha1("./charts/users/${f}") if f != "values-test.yaml"
     ]))
   })]
 
@@ -152,7 +154,7 @@ resource "helm_release" "this" {
 }
 
 resource "local_file" "users_values" {
-  filename = "${path.module}/../../charts/users/values-test.yaml"
+  filename = "./charts/users/values-test.yaml"
   content = yamlencode({
     users = local.users
     ingress = {
@@ -168,11 +170,11 @@ data "http" "pagedjs" {
 }
 
 resource "local_file" "access_cards" {
-  filename = "${path.module}/../../cards/cards.html"
-  content = templatefile("${path.module}/templates/cards.html.tpl", {
+  filename = "cards.html"
+  content = templatefile("cards.html.tpl", {
     users  = local.users
     domain = local.variables.workshop_domain
-    css    = file("${path.module}/../../cards/styles.css")
+    css    = file("styles.css")
     pagedjs = data.http.pagedjs.response_body
   })
 }

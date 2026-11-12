@@ -22,4 +22,12 @@ terraform {
     }
   }
   required_version = "~> 1.11"
+
+  backend "s3" {
+    bucket       = "camptocamp-aws-is-training-terraform-state"
+    key          = "github.com/vampouille/cloudnative-pg-anonymizer-lab/terragrunt/03-app/terraform.tfstate"
+    region       = "eu-west-1"
+    use_lockfile = true
+    profile      = "c2c-is-training"
+  }
 }

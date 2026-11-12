@@ -1,3 +1,8 @@
+terraform {
+  # required : terragrunt run --experiment no-dot-terragrunt-cache --all apply --inputs-debug 
+  no_dot_terragrunt_cache = true
+}
+
 dependency "kapsule" {
   config_path = "../01-kapsule/"
 }
