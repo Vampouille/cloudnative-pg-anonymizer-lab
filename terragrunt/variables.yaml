@@ -29,7 +29,7 @@ cluster:
     #
     # One DEV1-L node have 6300Mi of allocable memory, so based on limit one node can host 3 users.
     # At the end we need users/3 nodes
-    # 40 --> 14 nodes
+    # 40 --> 14 nodes ~ 2€ for 4h of workshop
     # 30 --> 10 nodes
     # 20 --> 7 nodes
     worker:
@@ -44,5 +44,12 @@ scaleway_project_id: "0d4603b7-bfcc-4860-87fc-a5e755efec65" # pgdays-workshop
 network_mask: "172.18.0.0/22"
 workshop_domain: "campto.camp"
 letsencrypt_email: "admin@campto.camp"
-users: 40
+# Workshop participants: one line per user (columns: url,user,password).
+# Path is relative to the terragrunt/ directory.
+# Each line is served as JSON on https://<url>/data, extra columns included.
+users_csv: ../cards/print/cartes.csv
+# Values shared by every participant, merged into each user's /data JSON
+# (CSV columns take precedence). Key "foo_bar" → placeholder __FOO_BAR__.
+users_common_data:
+  slides_pdf_url: https://raw.githubusercontent.com/Vampouille/cloudnative-pg-anonymizer-lab/refs/heads/main/slides/slides.pdf
 ...

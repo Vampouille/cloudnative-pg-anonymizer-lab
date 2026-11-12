@@ -4,8 +4,8 @@
 apiVersion: v1
 kind: LimitRange
 metadata:
-  name: {{ .username }}
-  namespace: {{ .username }}
+  name: {{ .user }}
+  namespace: {{ .user }}
   labels:
     {{- include "users.labels" $ | nindent 4 }}
 spec:

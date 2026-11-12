@@ -60,8 +60,8 @@ spec:
               mountPath: /usr/share/nginx/html/static
               readOnly: true
             {{- range .Values.users }}
-            - name: {{ .username }}
-              mountPath: /usr/share/nginx/html/{{ .username }}
+            - name: {{ .user }}
+              mountPath: /usr/share/nginx/html/{{ .user }}
               readOnly: true
             {{- end }}
       volumes:
@@ -78,7 +78,7 @@ spec:
           secret:
             secretName: {{ include "users.fullname" . }}-static
         {{- range .Values.users }}
-        - name: {{ .username }}
+        - name: {{ .user }}
           secret:
-            secretName: {{ .username }}
+            secretName: {{ .user }}
         {{- end }}

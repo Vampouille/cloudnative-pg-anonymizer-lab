@@ -1,6 +1,6 @@
 {{- $namespaces := list }}
 {{- range .Values.users }}
-{{- $namespaces = append $namespaces .username }}
+{{- $namespaces = append $namespaces .user }}
 {{- end }}
 ---
 apiVersion: kyverno.io/v1

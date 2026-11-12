@@ -1,9 +1,7 @@
-* Simplify instructions for kubectl installation
 * Improve integration with existing kubeconfig, try to import downloaded kubeconfig into ~/.kube/config with a fency kubectl command. Add slides to warn about already existing ~/kube/config (create 2 scenario: with or without default kubeconfig)
 * lab2: during presentation show, label usage for primary: cnpg.io/instanceRole: primary, a lifecycle of instance linked to a imagecatalog
 * lab1: during presentation show 'ready status': define micro lb config: prod-r,
   prod-ro, prod-rw
-* fix copy function that remove leading spaces
 
 
 # Instructions
@@ -189,7 +187,7 @@ spec:
     major: 18
   postgresGID: 999 # initdb: could not look up effective user ID 26: user does not exist
   postgresUID: 999
-```  
+```
 
 Inspect kubernetes service associated to the `prod` cluster:
 

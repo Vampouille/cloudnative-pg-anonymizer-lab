@@ -1,6 +1,5 @@
 cards/cards.html
 cards/*.pdf
-kubeconfigs/
 app/
 old-lab/
 charts/users/values-test.yaml

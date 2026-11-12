@@ -1,24 +1,23 @@
-resource "random_password" "token" {
-  count = local.variables.users
-
-  length  = 8
-  special = false
-  upper   = false
-  lower   = true
-  numeric = false
-}
-
 locals {
-  users = [for count in range(local.variables.users):
-    {
-      username = "user${count + 1}",
-      password = random_password.token[count].result
-    }
-  ]
+  # One map per CSV line: { url = "user1.campto.camp", user = "user1", password = "..." }
+  users_csv = csvdecode(file("${path.module}/../${local.variables.users_csv}"))
+
+  # Values shared by all users, merged into each /data JSON
+  users_common_data = try(local.variables.users_common_data, {})
+
+  # Internal representation used by DNS, dashboard, Helm chart and cards
+  users = [for row in local.users_csv : {
+    user     = row.user
+    password = row.password
+    host     = row.url
+  }]
+
+  # Duplicate usernames in the CSV make this expression fail
+  users_csv_by_name = { for row in local.users_csv : row.user => row }
 }
 
 resource "kubernetes_namespace" "user" {
-  for_each = { for u in local.users : u.username => u }
+  for_each = { for u in local.users : u.user => u }
 
   metadata {
     annotations = {
@@ -35,7 +34,7 @@ resource "kubernetes_namespace" "user" {
 }
 
 resource "kubernetes_service_account" "user" {
-  for_each = { for u in local.users : u.username => u }
+  for_each = { for u in local.users : u.user => u }
 
   metadata {
     name = each.key
@@ -44,7 +43,7 @@ resource "kubernetes_service_account" "user" {
 }
 
 resource "kubernetes_token_request_v1" "user" {
-  for_each = { for u in local.users : u.username => u }
+  for_each = { for u in local.users : u.user => u }
 
   metadata {
     name      = kubernetes_service_account.user[each.key].metadata[0].name
@@ -59,7 +58,7 @@ resource "kubernetes_token_request_v1" "user" {
 
 
 output "users_passwords" {
-  value = { for u in local.users : u.username => u.password }
+  value = { for u in local.users : u.user => u.password }
   sensitive = true
 }
 
@@ -76,7 +75,7 @@ resource "kubernetes_namespace" "users" {
 }
 
 resource "kubernetes_secret" "user" {
-  for_each = { for u in local.users : u.username => u }
+  for_each = { for u in local.users : u.user => u }
 
   metadata {
     name      = each.key
@@ -86,6 +85,14 @@ resource "kubernetes_secret" "user" {
   data = {
     token    = kubernetes_token_request_v1.user[each.key].token
     password = each.value.password
+    # Served on https://<url>/data and injected in instructions.html:
+    # each key "foo_bar" replaces the placeholder __FOO_BAR__ in the page.
+    # Common values < CSV line < token
+    "data.json" = jsonencode(merge(
+      local.users_common_data,
+      local.users_csv_by_name[each.key],
+      { token = kubernetes_token_request_v1.user[each.key].token }
+    ))
     "kubeconfig.yaml" = <<-EOT
 apiVersion: v1
 kind: Config
@@ -131,7 +138,6 @@ resource "helm_release" "this" {
   values = [yamlencode({
     users = local.users
     ingress = {
-      host    = local.variables.workshop_domain
       enabled = true
     }
     # Force redeployment when local chart files change
@@ -150,7 +156,6 @@ resource "local_file" "users_values" {
   content = yamlencode({
     users = local.users
     ingress = {
-      host    = local.variables.workshop_domain
       enabled = true
     }
   })

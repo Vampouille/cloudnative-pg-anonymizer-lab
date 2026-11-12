@@ -3,14 +3,14 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ .username }}-admin
-  namespace: {{ .username }}
+  name: {{ .user }}-admin
+  namespace: {{ .user }}
   labels:
     {{- include "users.labels" $ | nindent 4 }}
 subjects:
   - kind: ServiceAccount
-    name: {{ .username }}
-    namespace: {{ .username }}
+    name: {{ .user }}
+    namespace: {{ .user }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

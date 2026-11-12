@@ -28,7 +28,7 @@ resource "helm_release" "dashboard" {
 # ── htpasswd entries (bcrypt) for all participants ────────────────────────────
 locals {
   dashboard_htpasswd = join("\n", [
-    for u in local.users : "${u.username}:${bcrypt(u.password)}"
+    for u in local.users : "${u.user}:${bcrypt(u.password)}"
   ])
 }
 

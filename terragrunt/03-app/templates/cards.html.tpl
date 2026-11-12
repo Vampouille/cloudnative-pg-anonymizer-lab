@@ -14,11 +14,11 @@ ${css}  </style>
       <div class="card-title">Workshop Access</div>
       <div class="field">
         <span class="label">URL</span>
-        <span class="value">${u.username}.${domain}</span>
+        <span class="value">${u.host}</span>
       </div>
       <div class="field">
         <span class="label">User</span>
-        <span class="value">${u.username}</span>
+        <span class="value">${u.user}</span>
       </div>
       <div class="field">
         <span class="label">Password</span>

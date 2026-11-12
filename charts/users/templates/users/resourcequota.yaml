@@ -4,8 +4,8 @@
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: {{ .username }}-quota
-  namespace: {{ .username }}
+  name: {{ .user }}-quota
+  namespace: {{ .user }}
   labels:
     {{- include "users.labels" $ | nindent 4 }}
 spec:
