@@ -52,4 +52,5 @@ users_csv: users.csv
 # (CSV columns take precedence). Key "foo_bar" → placeholder __FOO_BAR__.
 users_common_data:
   slides_pdf_url: https://raw.githubusercontent.com/Vampouille/cloudnative-pg-anonymizer-lab/refs/heads/main/slides/slides.pdf
+  sc_url: "https://ze2zz7yjlt.ks.private.cloud.swisscom.ch/"
 ...

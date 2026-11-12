@@ -137,18 +137,27 @@
           <button class="accordion-button" type="button"
                   data-bs-toggle="collapse" data-bs-target="#step0"
                   aria-expanded="true" aria-controls="step0">
-            Step 1 – Connect to the Kubernetes Cluster
+            Step 1 – Connect to the Swisscom Portal
           </button>
         </h2>
         <div id="step0" class="accordion-collapse collapse show"
              data-bs-parent="#workshopAccordion">
           <div class="accordion-body">
             <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Configure your local tools and authenticate to the cluster.
+              <strong>Goal:</strong> Access the Swisscom Portal, to be able to deploy a Kubernetes cluster.
             </div>
 
-            <h6>1. Install kubectl</h6>
-            <p>Make sure <code>kubectl</code> is installed on your machine:</p>
+            <h6>1. Login</h6>
+            <p>Open a browser and use the following credentials to log into the Swisscom Portal: <br>
+            - URL: <a href="__SC_URL__" target="_blank">__SC_URL__</a><br>
+            - Method: <strong>Log in with Demo OIDC</strong><br>
+            - User: <strong>__SC_LOGIN__</strong><br>
+            - Password: <strong>__SC_PASS__</strong><br>
+            
+
+
+            <h6>2. Install kubectl</h6>
+            Make sure <code>kubectl</code> is installed on your machine:</p>
             <pre><code class="language-bash"># Linux (amd64)
 export KUBECTL_VERSION=$(curl -Ls https://dl.k8s.io/release/stable.txt)
 curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
