@@ -1,6 +1,6 @@
 kubeconfig-admin
 .terraform/
-charts/
+03-app/charts/users/values-test.yaml
 terraform.tfstate
 terraform.tfstate.backup
 terragrunt-debug.tfvars.json
