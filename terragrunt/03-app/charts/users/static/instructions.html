@@ -144,20 +144,13 @@
              data-bs-parent="#workshopAccordion">
           <div class="accordion-body">
             <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Access the Swisscom Portal, to be able to deploy a Kubernetes cluster.
+              <strong>Goal:</strong> Create a Kubernetes cluster on the Swisscom Kubernetes Platform
+              (1 worker node, with <strong>cloudnative-pg</strong> and the
+              <strong>Openmetrics Particle Accelerator Lab</strong> pre-installed), then download its kubeconfig.
             </div>
 
-            <h6>1. Login</h6>
-            <p>Open a browser and use the following credentials to log into the Swisscom Portal: <br>
-            - URL: <a href="__SC_URL__" target="_blank">__SC_URL__</a><br>
-            - Method: <strong>Log in with Demo OIDC</strong><br>
-            - User: <strong>__SC_LOGIN__</strong><br>
-            - Password: <strong>__SC_PASS__</strong><br>
-            
-
-
-            <h6>2. Install kubectl</h6>
-            Make sure <code>kubectl</code> is installed on your machine:</p>
+            <h6>1. Install kubectl</h6>
+            <p>Make sure <code>kubectl</code> is installed on your machine:</p>
             <pre><code class="language-bash"># Linux (amd64)
 export KUBECTL_VERSION=$(curl -Ls https://dl.k8s.io/release/stable.txt)
 curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
@@ -176,21 +169,126 @@ winget install Kubernetes.kubectl</code></pre>
               a terminal UI to browse pods, logs and events without typing <code>kubectl</code> commands.
             </div>
 
-            <h6>2. Download your kubeconfig</h6>
-            <p>Click the button below (or use the toolbar button), then move the file to <code>~/.kube/config</code>:</p>
-            <a class="btn mb-3 btn-primary btn-sm"
-               href="/kubeconfig.yaml" download="kubeconfig.yaml">
-              &#8659; Download KUBECONFIG
-            </a>
+            <h6 class="mt-4">2. Sign in to the Swisscom Portal</h6>
+            <ol>
+              <li>Open <a href="__SC_URL__" target="_blank">__SC_URL__</a> and click <strong>Sign in</strong>.</li>
+              <li>On the <em>Login to Swisscom Kubernetes Platform</em> page, choose <strong>Log in with Demo OIDC</strong>.</li>
+              <li>Use these credentials:<br>
+                User: <strong>__SC_LOGIN__</strong><br>
+                Password: <strong>__SC_PASS__</strong></li>
+            </ol>
+            <img class="img-fluid rounded border mb-2" loading="lazy" alt="Sign in (1)" src="./img/slide-19-1.png">
+            <img class="img-fluid rounded border mb-3" loading="lazy" alt="Sign in (2)" src="./img/slide-19-2.png">
+
+            <h6 class="mt-4">3. Choose your project</h6>
+            <p>Click the project you were assigned (e.g. <code>camptocamp-01</code>).</p>
+            <img class="img-fluid rounded border mb-3" loading="lazy" alt="Choose project" src="./img/slide-20-1.png">
+
+            <h6 class="mt-4">4. Start a new cluster</h6>
+            <p>On the <strong>Project Overview</strong> page, click <strong>Create Resource &rarr; Cluster</strong>.
+
+            <img class="img-fluid rounded border mb-3" loading="lazy" alt="Create a new cluster" src="./img/slide-21-1.png">
+            The <em>Create Cluster</em> wizard opens with six tabs:
+            <strong>Provider &rarr; Cluster &rarr; Settings &rarr; Initial Nodes &rarr; Applications &rarr; Summary</strong>.</p>
+            <h6 class="mt-4">5. Provider</h6>
+            <ol>
+              <li>Under <strong>Provider</strong>, select <strong>KubeVirt</strong>.</li>
+                <img class="img-fluid rounded border mb-2" loading="lazy" alt="Select provider" src="./img/slide-22-1.png">
+
+                <li>Under <strong>Datacenter</strong>, select <strong>east</strong> (CH).</li>
+                <img class="img-fluid rounded border mb-3" loading="lazy" alt="Select datacenter" src="./img/slide-23-1.png">
+
+                <li>Click <strong>Next</strong>.</li>
+            </ol>
+
+            <h6 class="mt-4">6. Cluster</h6>
+            <ol>
+              <li>Enter a <strong>Name</strong> for the cluster (or click the shuffle icon to generate one).</li>
+                <img class="img-fluid rounded border mb-2" loading="lazy" alt="Cluster name (1)" src="./img/slide-24-1.png">
+
+                <li>Keep the defaults: control plane version 1.33.x and the <strong>Cilium</strong> CNI.</li>
+                <img class="img-fluid rounded border mb-3" loading="lazy" alt="Cluster name (2)" src="./img/slide-24-2.png">
+
+                <li>Scroll down and click <strong>Next</strong>.</li>
+            </ol>
+
+            <h6 class="mt-4">7. Settings</h6>
+            <p>In <strong>Basic Settings &rarr; Provider Preset</strong>, select <strong>swisscom-east</strong>, then click <strong>Next</strong>.</p>
+            <img class="img-fluid rounded border mb-3" loading="lazy" alt="Select settings" src="./img/slide-25-1.png">
+
+            <h6 class="mt-4">8. Initial Nodes</h6>
+            <p>Set up a single worker node with these values, then click <strong>Next</strong>:</p>
+            <table class="table table-sm table-bordered bg-white">
+              <thead><tr><th>Field</th><th>Value</th></tr></thead>
+              <tbody>
+                <tr><td>Replicas</td><td><strong>1</strong></td></tr>
+                <tr><td>Operating system</td><td>Ubuntu (profile <code>swisscom-ubuntu-24.04</code>)</td></tr>
+                <tr><td>CPUs</td><td><strong>4</strong></td></tr>
+                <tr><td>Memory (MB)</td><td><strong>16000</strong> (&asymp;16 GB)</td></tr>
+                <tr><td>Subnet</td><td>any available subnet</td></tr>
+                <tr><td>Primary disk – Ubuntu system image</td><td>Ubuntu 24.04 image</td></tr>
+                <tr><td>Primary disk – Storage class</td><td><code>san-infra-standard-olt</code> (default)</td></tr>
+                <tr><td>Primary disk – Size (GB)</td><td><strong>20</strong></td></tr>
+              </tbody>
+            </table>
+            <img class="img-fluid rounded border mb-2" loading="lazy" alt="Deploy only one node" src="./img/slide-26-1.png">
+            <img class="img-fluid rounded border mb-2" loading="lazy" alt="CPU, memory and disk" src="./img/slide-27-1.png">
+            <img class="img-fluid rounded border mb-3" loading="lazy" alt="Subnet and primary disk" src="./img/slide-28-1.png">
+
+            <h6 class="mt-4">9. Applications</h6>
+            <p>Install two applications on the new cluster.</p>
+
+            <p class="fw-semibold mb-1">9a. Add cloudnative-pg</p>
+            <ol>
+              <li>Click <strong>+ Add Application</strong>.<br>
+                <img class="img-fluid rounded border my-2" loading="lazy" alt="Add application" src="./img/slide-29-1.png"></li>
+              <li>In the <em>Select Application</em> tab, select <strong>cloudnative-pg</strong>.<br>
+                <img class="img-fluid rounded border my-2" loading="lazy" alt="Select cloudnative-pg" src="./img/slide-30-1.png"></li>
+              <li>In the <em>Settings</em> tab, keep version <code>0.29.1</code> and leave the namespace and name as <code>cloudnative-pg</code>.
+                <img class="img-fluid rounded border my-2" loading="lazy" alt="cloudnative-pg settings" src="./img/slide-31-1.png"></li>
+                Click <strong>Next</strong>.<br>
+              <li>In the <em>Application Values</em> tab, the default <code>values.yaml</code> should look like this
+                Click <strong>Add Application</strong>.<br>
+                <img class="img-fluid rounded border my-2" loading="lazy" alt="cloudnative-pg values" src="./img/slide-32-1.png"></li>
+            </ol>
+
+            <p><strong>cloudnative-pg</strong> should now be listed under <em>Applications to Install</em>.</p>
+            <img class="img-fluid rounded border mb-3" loading="lazy" alt="Applications to install" src="./img/slide-37-1.png">
+              Click <strong>Next</strong>.
+
+            <h6 class="mt-4">10. Summary and create</h6>
+            <p>Check the summary:</p>
+            <ul>
+              <li>Provider: KubeVirt, datacenter east (CH)</li>
+              <li>Initial nodes: 1 replica, Ubuntu</li>
+              <li>Applications: cloudnative-pg</li>
+              <li>Settings preset: swisscom-east</li>
+            </ul>
+            <p>Then click <strong>Create Cluster</strong>.</p>
+            <img class="img-fluid rounded border mb-3" loading="lazy" alt="Summary (2)" src="./img/slide-38-2.png">
+              <img class="img-fluid rounded border mb-2" loading="lazy" alt="Summary (1)" src="./img/slide-38-1.png">
+
+            <h6 class="mt-4">11. Download the kubeconfig</h6>
+            <ol>
+              <li> <strong>Wait until the cluster is ready. </strong> </li>
+                <li>The cluster page shows the control plane version, CNI and status.</li>
+              <li>Click <strong>Get Kubeconfig</strong> to download the file.</li>
+              <li><strong>Note where you saved the file.</strong> The next steps need it.</li>
+            </ol>
+            <img class="img-fluid rounded border mb-3" loading="lazy" alt="Get kubeconfig" src="./img/slide-39-1.png">
+            <img class="img-fluid rounded border mb-3" loading="lazy" alt="Get kubeconfig" src="./img/slide-40-1.png">
+            <img class="img-fluid rounded border mb-3" loading="lazy" alt="Get kubeconfig" src="./img/slide-41-1.png">
 
             <div class="callout-tip p-3 rounded mb-3">
-              <strong>Warning:</strong> Do not overwrite existing <code>~/.kube/config</code>.
+              <strong>Warning:</strong> Do not overwrite an existing <code>~/.kube/config</code>; use the <code>KUBECONFIG</code> variable instead.
             </div>
 
-            <h6 class="mt-3">3. Check access</h6>
-            <pre><code>kubectl get node</code></pre>
-
-            You should see a set of kubernetes nodes.
+            <h6 class="mt-3">12. Check access</h6>
+            <pre><code class="language-bash">export KUBECONFIG=/path/to/downloaded/kubeconfig
+kubectl get nodes
+kubectl get pods -A</code></pre>
+            <p>You should see one <code>Ready</code> node, plus pods in the <code>cloudnative-pg</code> and
+            <code>openmetrics-accelerator-lab</code> namespaces.</p>
           </div>
         </div>
       </div>
