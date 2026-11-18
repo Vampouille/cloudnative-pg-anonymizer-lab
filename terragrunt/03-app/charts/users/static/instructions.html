@@ -436,8 +436,28 @@ kubectl delete pod -l "app.kubernetes.io/managed-by=cloudnative-pg"</code></pre>
               <strong>Goal:</strong> Deploy a cluster with the PostgreSQL Anonymizer extension and define masking rules on sensitive data.
             </div>
 
-            <h6>1. Inspect ClusterImageCatalog</h6>
-            <pre><code class="language-bash">kubectl describe clusterimagecatalog</code></pre>
+            <h6>1. Deploy the ClusterImageCatalog</h6>
+            <p>Create a file <code>cluster-image-catalog.yaml</code>:</p>
+            <pre><code class="language-yaml">---
+apiVersion: postgresql.cnpg.io/v1
+kind: ClusterImageCatalog
+metadata:
+  name: camptocamp
+spec:
+  images:
+    - major: 14
+      image: ghcr.io/camptocamp/postgres:14
+    - major: 15
+      image: ghcr.io/camptocamp/postgres:15
+    - major: 16
+      image: ghcr.io/camptocamp/postgres:16
+    - major: 17
+      image: ghcr.io/camptocamp/postgres:17
+    - major: 18
+      image: ghcr.io/camptocamp/postgres:18</code></pre>
+
+            <p>Deploy the manifest:</p>
+            <pre><code class="language-bash">kubectl apply -f cluster-image-catalog.yaml</code></pre>
 
             <h6>2. Clean up the previous cluster</h6>
             <pre><code class="language-bash">kubectl delete cluster prod</code></pre>
