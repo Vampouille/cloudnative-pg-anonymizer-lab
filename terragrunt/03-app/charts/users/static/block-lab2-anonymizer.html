@@ -1,0 +1,96 @@
+            <div class="callout-goal p-3 rounded mb-3">
+              <strong>Goal:</strong> Deploy a cluster with the PostgreSQL Anonymizer extension and define masking rules on sensitive data.
+            </div>
+
+            <h6>1. Deploy the ClusterImageCatalog</h6>
+            <p>Create a file <code>cluster-image-catalog.yaml</code>:</p>
+            <pre><code class="language-yaml">---
+apiVersion: postgresql.cnpg.io/v1
+kind: ClusterImageCatalog
+metadata:
+  name: camptocamp
+spec:
+  images:
+    - major: 14
+      image: ghcr.io/camptocamp/postgres:14
+    - major: 15
+      image: ghcr.io/camptocamp/postgres:15
+    - major: 16
+      image: ghcr.io/camptocamp/postgres:16
+    - major: 17
+      image: ghcr.io/camptocamp/postgres:17
+    - major: 18
+      image: ghcr.io/camptocamp/postgres:18</code></pre>
+
+            <p>Deploy the manifest:</p>
+            <pre><code class="language-bash">kubectl apply -f cluster-image-catalog.yaml</code></pre>
+
+            <h6>2. Clean up the previous cluster</h6>
+            <pre><code class="language-bash">kubectl delete cluster prod</code></pre>
+
+            <h6>3. Deploy a new cluster with PostgreSQL Anonymizer</h6>
+            <p>Create a file <code>prod-anon.yaml</code>:</p>
+            <pre><code class="language-yaml">---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: prod
+spec:
+  instances: 3
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ClusterImageCatalog
+    name: camptocamp
+    major: 18
+  postgresGID: 999 # initdb: could not look up effective user ID 26: user does not exist
+  postgresUID: 999
+  postgresql:
+    pg_hba:
+      - host all all all trust
+      - host replication all all trust
+  storage:
+    size: 2Gi
+  bootstrap:
+    initdb:
+      postInitSQL:
+        - |
+          ALTER DATABASE app
+            SET session_preload_libraries = 'anon';
+          CREATE EXTENSION anon;
+          ALTER DATABASE app
+            SET anon.transparent_dynamic_masking TO true;</code></pre>
+
+            <pre><code class="language-bash">kubectl apply -f prod-anon.yaml</code></pre>
+
+            <h6>4. Create a <code>people</code> table in the <code>app</code> database</h6>
+            <pre><code class="language-bash">kubectl cnpg psql prod -- app</code></pre>
+            <pre><code class="language-sql">CREATE TABLE people AS
+    SELECT  153478       AS id,
+            'Sarah'      AS firstname,
+            'Conor'      AS lastname,
+            '0609110911' AS phone;</code></pre>
+
+            <h6>5. Define masking rules</h6>
+            <pre><code class="language-sql">SECURITY LABEL FOR anon ON COLUMN people.lastname
+  IS 'MASKED WITH FUNCTION anon.dummy_last_name()';
+
+SECURITY LABEL FOR anon ON COLUMN people.phone
+  IS 'MASKED WITH FUNCTION anon.partial(phone,2,$$******$$,2)';</code></pre>
+
+            <h6>6. Create a masked user</h6>
+            <pre><code class="language-sql">CREATE ROLE skynet LOGIN;
+
+SECURITY LABEL FOR anon ON ROLE skynet IS 'MASKED';
+
+GRANT pg_read_all_data to skynet;</code></pre>
+
+            <h6>7. Connect with the <code>skynet</code> role</h6>
+            <pre><code class="language-bash">kubectl cnpg psql prod -- -h localhost --username skynet app</code></pre>
+
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Note:</strong> The <code>local</code> policy in <code>pg_hba.conf</code> is managed by CNPG so
+              <code>peer</code> connection cannot be used for the <code>skynet</code> role.
+            </div>
+
+            <h6>8. Inspect data</h6>
+            <pre><code class="language-sql">TABLE people;</code></pre>

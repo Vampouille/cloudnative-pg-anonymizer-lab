@@ -22,3 +22,5 @@
 *.tmproj
 .vscode/
 .terragrunt-module-manifest/
+# Static files are fetched from GitHub by an initContainer (see values.static)
+static/

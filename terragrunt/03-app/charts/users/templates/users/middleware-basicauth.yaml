@@ -1,13 +1,16 @@
-# user1.campto.camp/ --> /static/instructions.html
+# user1.campto.camp/ --> redirect to /static/instructions.html
+# (redirect, not rewrite: the page loads its blocks and images with
+#  relative paths, so the browser URL must be under /static/)
 ---
 kind: Middleware
 apiVersion: traefik.io/v1alpha1
 metadata:
-  name: rewrite-instructions
+  name: redirect-instructions
   namespace: {{ $.Release.Namespace }}
 spec:
-  replacePath:
-    path: "/static/instructions.html"
+  redirectRegex:
+    regex: "^(https?://[^/]+)/$"
+    replacement: "${1}/static/instructions.html"
 
 # user1.campto.camp/favicon.ico --> /static/favicon.ico
 ---
@@ -79,7 +82,7 @@ spec:
   chain:
     middlewares:
     - name: {{ .user }}-basicauth
-    - name: rewrite-instructions
+    - name: redirect-instructions
 # * user1.campto.camp/favicon.ico
 ---
 kind: Middleware
