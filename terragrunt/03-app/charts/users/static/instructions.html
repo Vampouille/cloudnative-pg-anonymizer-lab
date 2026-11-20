@@ -487,16 +487,16 @@ spec:
     initdb:
       postInitSQL:
         - |
-          ALTER DATABASE postgres
+          ALTER DATABASE app
             SET session_preload_libraries = 'anon';
           CREATE EXTENSION anon;
-          ALTER DATABASE postgres
+          ALTER DATABASE app
             SET anon.transparent_dynamic_masking TO true;</code></pre>
 
             <pre><code class="language-bash">kubectl apply -f prod-anon.yaml</code></pre>
 
-            <h6>4. Create a <code>people</code> table</h6>
-            <pre><code class="language-bash">kubectl cnpg psql prod</code></pre>
+            <h6>4. Create a <code>people</code> table in the <code>app</code> database</h6>
+            <pre><code class="language-bash">kubectl cnpg psql prod -- app</code></pre>
             <pre><code class="language-sql">CREATE TABLE people AS
     SELECT  153478       AS id,
             'Sarah'      AS firstname,
@@ -518,7 +518,7 @@ SECURITY LABEL FOR anon ON ROLE skynet IS 'MASKED';
 GRANT pg_read_all_data to skynet;</code></pre>
 
             <h6>7. Connect with the <code>skynet</code> role</h6>
-            <pre><code class="language-bash">kubectl cnpg psql prod -- -h localhost --username skynet postgres</code></pre>
+            <pre><code class="language-bash">kubectl cnpg psql prod -- -h localhost --username skynet app</code></pre>
 
             <div class="callout-tip p-3 rounded mb-3">
               <strong>Note:</strong> The <code>local</code> policy in <code>pg_hba.conf</code> is managed by CNPG so
