@@ -1,0 +1,68 @@
+            <div class="callout-goal p-3 rounded mb-3">
+              <strong>Goal:</strong> Create a new cluster bootstrapped from a <code>pg_dump</code> with a masked role.
+            </div>
+
+            <h6>1. Create the cluster definition</h6>
+            <p>Create a <code>lab3.yaml</code> file with a new Cluster definition compatible with PostgreSQL Anonymizer:</p>
+            <pre><code class="language-yaml">apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: prod-copy-green
+spec:
+  instances: 1
+  storage:
+    size: 2Gi
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ClusterImageCatalog
+    name: camptocamp
+    major: 18
+  postgresGID: 999 # initdb: could not look up effective user ID 26: user does not exist
+  postgresUID: 999</code></pre>
+
+            <h6>2. Inspect services of the <code>prod</code> cluster</h6>
+            <p>Because <code>pg_dump</code> needs to acquire a lock, we will use the <code>prod-rw</code> endpoint.
+               We will use the masked role <code>skynet</code> for data extraction.</p>
+            <pre><code class="language-bash">kubectl get service -l 'cnpg.io/cluster=prod'</code></pre>
+
+            <h6>3. Add the <code>externalClusters</code> section</h6>
+            <pre><code class="language-yaml">  externalClusters:
+    - name: prod
+      connectionParameters:
+        host: prod-rw
+        user: skynet
+        dbname: postgres</code></pre>
+
+            <h6>4. Add the <code>bootstrap</code> section</h6>
+            <pre><code class="language-yaml">  bootstrap:
+    initdb:
+      import:
+        type: monolith
+        databases:
+          - postgres
+        source:
+          externalCluster: prod
+        pgDumpExtraOptions:
+          - --no-owner
+          - --no-privileges</code></pre>
+
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Tip:</strong> The <code>pg_dump</code> options ensure that there are no errors related to missing roles.
+            </div>
+
+            <h6>5. Deploy the cluster</h6>
+            <pre><code class="language-bash">kubectl apply -f lab3.yaml
+kubectl get pod --watch</code></pre>
+
+            <p>A <code>prod-copy-green-init</code> pod is responsible for launching <code>initdb</code> and then <code>pg_dump</code>/<code>pg_restore</code>.</p>
+
+            <h6>6. Connect to the cluster</h6>
+            <pre><code class="language-bash">kubectl cnpg psql prod-copy-green</code></pre>
+
+            <h6>7. Search for personally identifiable information</h6>
+            <pre><code class="language-sql">TABLE people;</code></pre>
+
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Note:</strong> Using the <code>pg_dump</code> method, unlike previous lab, the data are now stable.
+            </div>
+

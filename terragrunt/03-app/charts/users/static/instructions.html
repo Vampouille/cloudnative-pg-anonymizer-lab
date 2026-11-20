@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Workshop CloudNativePG – __USER__</title>
+  <link rel="icon" href="favicon.ico">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/base16/atlas.min.css">
   <style>
@@ -128,469 +129,9 @@
       Password: <strong>__PASSWORD__</strong>
     </div>
 
-    <!-- data-bs-parent enforces one-open-at-a-time -->
-    <div class="accordion" id="workshopAccordion">
-
-      <!-- ── Step 1 ── -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#step0"
-                  aria-expanded="true" aria-controls="step0">
-            Step 1 – Connect to the Swisscom Portal
-          </button>
-        </h2>
-        <div id="step0" class="accordion-collapse collapse show"
-             data-bs-parent="#workshopAccordion">
-          <div class="accordion-body">
-            <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Access the Swisscom Portal, to be able to deploy a Kubernetes cluster.
-            </div>
-
-            <h6>1. Login</h6>
-            <p>Open a browser and use the following credentials to log into the Swisscom Portal: <br>
-            - URL: <a href="__SC_URL__" target="_blank">__SC_URL__</a><br>
-            - Method: <strong>Log in with Demo OIDC</strong><br>
-            - User: <strong>__SC_LOGIN__</strong><br>
-            - Password: <strong>__SC_PASS__</strong><br>
-            
-
-
-            <h6>2. Install kubectl</h6>
-            Make sure <code>kubectl</code> is installed on your machine:</p>
-            <pre><code class="language-bash"># Linux (amd64)
-export KUBECTL_VERSION=$(curl -Ls https://dl.k8s.io/release/stable.txt)
-curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-chmod +x kubectl &amp;&amp; sudo mv kubectl /usr/local/bin/
-
-# macOS (Homebrew)
-brew install kubectl
-
-# Windows (winget)
-winget install Kubernetes.kubectl</code></pre>
-            <pre><code class="language-bash">kubectl version --client</code></pre>
-
-            <div class="callout-tip p-3 rounded mb-3">
-              <strong>Tip:</strong> Consider also installing
-              <a href="https://k9scli.io/" target="_blank">k9s</a>,
-              a terminal UI to browse pods, logs and events without typing <code>kubectl</code> commands.
-            </div>
-
-            <h6>2. Download your kubeconfig</h6>
-            <p>Click the button below (or use the toolbar button), then move the file to <code>~/.kube/config</code>:</p>
-            <a class="btn mb-3 btn-primary btn-sm"
-               href="/kubeconfig.yaml" download="kubeconfig.yaml">
-              &#8659; Download KUBECONFIG
-            </a>
-
-            <div class="callout-tip p-3 rounded mb-3">
-              <strong>Warning:</strong> Do not overwrite existing <code>~/.kube/config</code>.
-            </div>
-
-            <h6 class="mt-3">3. Check access</h6>
-            <pre><code>kubectl get node</code></pre>
-
-            You should see a set of kubernetes nodes.
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Step 2 ── -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#step0b"
-                  aria-expanded="false" aria-controls="step0b">
-            Step 2 – Install the kubectl-cnpg plugin
-          </button>
-        </h2>
-        <div id="step0b" class="accordion-collapse collapse"
-             data-bs-parent="#workshopAccordion">
-          <div class="accordion-body">
-            <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Install the <code>kubectl-cnpg</code> plugin (v1.29.0) to interact with CloudNativePG clusters via <code>kubectl</code>.
-            </div>
-
-            <p>
-            Follow instructions from official <a href="https://cloudnative-pg.io/docs/1.29/kubectl-plugin#install">documentation</a>.
-            You can also download the archive for your platform from the
-              <a href="https://github.com/cloudnative-pg/cloudnative-pg/releases/tag/v1.29.0" target="_blank">GitHub release page</a>,
-              extract it and place the binary in your <code>PATH</code>.
-            </p>
-
-            <p>Verify the installation:</p>
-            <pre><code class="language-bash">kubectl cnpg version</code></pre>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Step 3 ── -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#step1"
-                  aria-expanded="false" aria-controls="step1">
-            Step 3 – Kubernetes Dashboard
-          </button>
-        </h2>
-        <div id="step1" class="accordion-collapse collapse"
-             data-bs-parent="#workshopAccordion">
-          <div class="accordion-body">
-            <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Access the graphical Kubernetes Dashboard to visualize your resources.
-            </div>
-
-            <h6>1. Copy your service account token</h6>
-            <p>Use the <strong>Copy Token</strong> button in the toolbar to display and copy your token,
-               then paste it on the dashboard login page.</p>
-            <button class="btn btn-success btn-sm" onclick="fetchAndCopyToken()">
-              &#128203; Copy Token
-            </button>
-
-            <h6 class="mt-3">2. Open the dashboard</h6>
-            <p>You will be prompted for your credentials:
-               <strong>__USER__</strong> / <strong>__PASSWORD__</strong>.</p>
-            <a class="btn btn-sm"
-               style="background:#7c3aed;color:#fff"
-               href="https://__USER__:__PASSWORD__@dashboard.campto.camp" target="_blank">
-              &#9654; Open Kubernetes Dashboard
-            </a>
-
-            <div class="callout-tip p-3 rounded mt-3">
-              <strong>Tip:</strong> In the top-left namespace selector, choose
-              <code>__USER__</code> to scope the view to your resources only.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Lab 1 ── -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#lab1"
-                  aria-expanded="false" aria-controls="lab1">
-            Lab 1 – Deploy a Cluster
-          </button>
-        </h2>
-        <div id="lab1" class="accordion-collapse collapse"
-             data-bs-parent="#workshopAccordion">
-          <div class="accordion-body">
-            <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Deploy a 3-instance PostgreSQL cluster managed by CloudNativePG, explore the created resources and test failover.
-            </div>
-
-            <h6>1. Create a cluster</h6>
-            <p>In a new folder, create a <code>lab1.yaml</code> file with:</p>
-            <pre><code class="language-yaml">apiVersion: postgresql.cnpg.io/v1
-kind: Cluster
-metadata:
-  name: prod
-spec:
-  instances: 3
-  storage:
-    size: 2Gi</code></pre>
-
-            <p>Deploy the manifest:</p>
-            <pre><code class="language-bash">kubectl apply -f lab1.yaml</code></pre>
-
-            <div class="callout-tip p-3 rounded mb-3">
-              <strong>Note:</strong> The installation of Cloud Native PG is mantory before deployment of your first cluster.
-            </div>
-
-
-            <h6>2. Inspect Kubernetes objects</h6>
-            <pre><code class="language-bash">kubectl get pod,service,secret,pvc -l "app.kubernetes.io/managed-by=cloudnative-pg"</code></pre>
-
-            <h6>3. Check cluster status</h6>
-            <pre><code class="language-bash">kubectl get cluster
-kubectl cnpg status prod # check timeline: 1</code></pre>
-
-            <h6>4. Connect to the cluster</h6>
-            <pre><code class="language-bash">kubectl cnpg psql prod</code></pre>
-
-            <h6>5. Kill replica or primary</h6>
-            <pre><code class="language-bash">kubectl delete pod prod-3 # kill a replica
-
-kubectl delete pod prod-1 # kill the primary
-kubectl cnpg status prod  # notice timeline increment: 2
-
-# Kill all cluster pods
-kubectl delete pod -l "app.kubernetes.io/managed-by=cloudnative-pg"</code></pre>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Lab 2 ── -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#lab2"
-                  aria-expanded="false" aria-controls="lab2">
-            Lab 2 – PostgreSQL Anonymizer
-          </button>
-        </h2>
-        <div id="lab2" class="accordion-collapse collapse"
-             data-bs-parent="#workshopAccordion">
-          <div class="accordion-body">
-            <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Deploy a cluster with the PostgreSQL Anonymizer extension and define masking rules on sensitive data.
-            </div>
-
-            <h6>1. Inspect ClusterImageCatalog</h6>
-            <pre><code class="language-bash">kubectl describe clusterimagecatalog</code></pre>
-
-            <h6>2. Clean up the previous cluster</h6>
-            <pre><code class="language-bash">kubectl delete cluster prod</code></pre>
-
-            <h6>3. Deploy a new cluster with PostgreSQL Anonymizer</h6>
-            <p>Create a file <code>prod-anon.yaml</code>:</p>
-            <pre><code class="language-yaml">---
-apiVersion: postgresql.cnpg.io/v1
-kind: Cluster
-metadata:
-  name: prod
-spec:
-  instances: 3
-  imageCatalogRef:
-    apiGroup: postgresql.cnpg.io
-    kind: ClusterImageCatalog
-    name: camptocamp
-    major: 18
-  postgresGID: 999 # initdb: could not look up effective user ID 26: user does not exist
-  postgresUID: 999
-  postgresql:
-    pg_hba:
-      - host all all all trust
-      - host replication all all trust
-  storage:
-    size: 2Gi
-  bootstrap:
-    initdb:
-      postInitSQL:
-        - |
-          ALTER DATABASE postgres
-            SET session_preload_libraries = 'anon';
-          CREATE EXTENSION anon;
-          ALTER DATABASE postgres
-            SET anon.transparent_dynamic_masking TO true;</code></pre>
-
-            <pre><code class="language-bash">kubectl apply -f prod-anon.yaml</code></pre>
-
-            <h6>4. Create a <code>people</code> table</h6>
-            <pre><code class="language-bash">kubectl cnpg psql prod</code></pre>
-            <pre><code class="language-sql">CREATE TABLE people AS
-    SELECT  153478       AS id,
-            'Sarah'      AS firstname,
-            'Conor'      AS lastname,
-            '0609110911' AS phone;</code></pre>
-
-            <h6>5. Define masking rules</h6>
-            <pre><code class="language-sql">SECURITY LABEL FOR anon ON COLUMN people.lastname
-  IS 'MASKED WITH FUNCTION anon.dummy_last_name()';
-
-SECURITY LABEL FOR anon ON COLUMN people.phone
-  IS 'MASKED WITH FUNCTION anon.partial(phone,2,$$******$$,2)';</code></pre>
-
-            <h6>6. Create a masked user</h6>
-            <pre><code class="language-sql">CREATE ROLE skynet LOGIN;
-
-SECURITY LABEL FOR anon ON ROLE skynet IS 'MASKED';
-
-GRANT pg_read_all_data to skynet;</code></pre>
-
-            <h6>7. Connect with the <code>skynet</code> role</h6>
-            <pre><code class="language-bash">kubectl cnpg psql prod -- -h localhost --username skynet postgres</code></pre>
-
-            <div class="callout-tip p-3 rounded mb-3">
-              <strong>Note:</strong> The <code>local</code> policy in <code>pg_hba.conf</code> is managed by CNPG so
-              <code>peer</code> connection cannot be used for the <code>skynet</code> role.
-            </div>
-
-            <h6>8. Inspect data</h6>
-            <pre><code class="language-sql">TABLE people;</code></pre>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Lab 3 ── -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#lab3"
-                  aria-expanded="false" aria-controls="lab3">
-            Lab 3 – Bootstrap Data
-          </button>
-        </h2>
-        <div id="lab3" class="accordion-collapse collapse"
-             data-bs-parent="#workshopAccordion">
-          <div class="accordion-body">
-            <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Create a new cluster bootstrapped from a <code>pg_dump</code> with a masked role.
-            </div>
-
-            <h6>1. Create the cluster definition</h6>
-            <p>Create a <code>lab3.yaml</code> file with a new Cluster definition compatible with PostgreSQL Anonymizer:</p>
-            <pre><code class="language-yaml">apiVersion: postgresql.cnpg.io/v1
-kind: Cluster
-metadata:
-  name: prod-copy-green
-spec:
-  instances: 1
-  storage:
-    size: 2Gi
-  imageCatalogRef:
-    apiGroup: postgresql.cnpg.io
-    kind: ClusterImageCatalog
-    name: camptocamp
-    major: 18
-  postgresGID: 999 # initdb: could not look up effective user ID 26: user does not exist
-  postgresUID: 999</code></pre>
-
-            <h6>2. Inspect services of the <code>prod</code> cluster</h6>
-            <p>Because <code>pg_dump</code> needs to acquire a lock, we will use the <code>prod-rw</code> endpoint.
-               We will use the masked role <code>skynet</code> for data extraction.</p>
-            <pre><code class="language-bash">kubectl get service -l 'cnpg.io/cluster=prod'</code></pre>
-
-            <h6>3. Add the <code>externalClusters</code> section</h6>
-            <pre><code class="language-yaml">  externalClusters:
-    - name: prod
-      connectionParameters:
-        host: prod-rw
-        user: skynet
-        dbname: postgres</code></pre>
-
-            <h6>4. Add the <code>bootstrap</code> section</h6>
-            <pre><code class="language-yaml">  bootstrap:
-    initdb:
-      import:
-        type: monolith
-        databases:
-          - postgres
-        source:
-          externalCluster: prod
-        pgDumpExtraOptions:
-          - --no-owner
-          - --no-privileges</code></pre>
-
-            <div class="callout-tip p-3 rounded mb-3">
-              <strong>Tip:</strong> The <code>pg_dump</code> options ensure that there are no errors related to missing roles.
-            </div>
-
-            <h6>5. Deploy the cluster</h6>
-            <pre><code class="language-bash">kubectl apply -f lab3.yaml
-kubectl get pod --watch</code></pre>
-
-            <p>A <code>prod-copy-green-init</code> pod is responsible for launching <code>initdb</code> and then <code>pg_dump</code>/<code>pg_restore</code>.</p>
-
-            <h6>6. Connect to the cluster</h6>
-            <pre><code class="language-bash">kubectl cnpg psql prod-copy-green</code></pre>
-
-            <h6>7. Search for personally identifiable information</h6>
-            <pre><code class="language-sql">TABLE people;</code></pre>
-
-            <div class="callout-tip p-3 rounded mb-3">
-              <strong>Note:</strong> Using the <code>pg_dump</code> method, unlike previous lab, the data are now stable.
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Lab 4 ── -->
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#lab4"
-                  aria-expanded="false" aria-controls="lab4">
-            Lab 4 – Replica Pool
-          </button>
-        </h2>
-        <div id="lab4" class="accordion-collapse collapse"
-             data-bs-parent="#workshopAccordion">
-          <div class="accordion-body">
-            <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Create a standalone replica cluster of <code>prod</code>, promote the cluster and apply static masking.
-            </div>
-
-            <h6>1. Inspect replication secrets created by the <code>prod</code> cluster</h6>
-            <pre><code class="language-bash">kubectl get secret -l app.kubernetes.io/managed-by=cloudnative-pg</code></pre>
-            <ul>
-              <li><code>prod-app</code> – credentials for the <code>app</code> role (user, password, URI)</li>
-              <li><code>prod-ca</code> – certificate authority for servers and certificate-based roles</li>
-              <li><code>prod-server</code> – server certificate</li>
-              <li><code>prod-replication</code> – certificate for streaming replication authentication</li>
-            </ul>
-
-            <h6>2. Try a connection with the default application role <code>app</code></h6>
-            <pre><code class="language-bash">export PROD_APP_URI=$(kubectl get secret prod-app -o jsonpath='{.data.uri}' | base64 -d)
-echo ${PROD_APP_URI}
-kubectl run psql --rm -it --image=ghcr.io/camptocamp/postgres:18 --restart=Never -- psql $PROD_APP_URI</code></pre>
-
-            <h6>3. Inspect the replication secret</h6>
-            <pre><code class="language-bash">kubectl get secret prod-replication -o yaml</code></pre>
-
-            <h6>4. Create the replica cluster</h6>
-            <p>Create a file <code>lab4.yaml</code>:</p>
-            <pre><code class="language-yaml">---
-apiVersion: postgresql.cnpg.io/v1
-kind: Cluster
-metadata:
-  name: prod-copy-blue
-spec:
-  instances: 1
-  storage:
-    size: 2Gi
-  imageCatalogRef:
-    apiGroup: postgresql.cnpg.io
-    kind: ClusterImageCatalog
-    name: camptocamp
-    major: 18
-  postgresGID: 999
-  postgresUID: 999
-  replica:
-    enabled: true
-    source: prod
-  bootstrap:
-    pg_basebackup:
-      source: prod
-  externalClusters:
-  - name: prod
-    connectionParameters:
-      host: prod-rw
-      user: streaming_replica
-      sslmode: verify-full
-    sslKey:
-      name: prod-replication
-      key: tls.key
-    sslCert:
-      name: prod-replication
-      key: tls.crt
-    sslRootCert:
-      name: prod-ca
-      key: ca.crt</code></pre>
-
-            <pre><code class="language-bash">kubectl apply -f lab4.yaml</code></pre>
-
-            <h6>5. Promote the replica cluster</h6>
-            <p>Once the cluster is ready, check its recovery state then promote it:</p>
-            <pre><code class="language-bash">kubectl cnpg psql prod-copy-blue -- -c "SELECT pg_is_in_recovery()"
-kubectl patch cluster prod-copy-blue --type='merge' -p '{"spec":{"replica":{"enabled":false}}}'
-kubectl cnpg psql prod-copy-blue -- -c "SELECT pg_is_in_recovery()"</code></pre>
-
-            <h6>6. Apply static masking</h6>
-            <p>Finally, destroy sensitive information by applying static masking:</p>
-            <pre><code class="language-sql">SELECT anon.anonymize_database();</code></pre>
-
-            <h6>7. Search for personally identifiable information</h6>
-            <pre><code class="language-sql">TABLE people;</code></pre>
-
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /accordion -->
+    <!-- Accordion items are built from BLOCKS (see script below);
+         data-bs-parent enforces one-open-at-a-time -->
+    <div class="accordion" id="workshopAccordion"></div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -662,12 +203,65 @@ kubectl cnpg psql prod-copy-blue -- -c "SELECT pg_is_in_recovery()"</code></pre>
       });
     }
 
+    /* ── Accordion blocks ──
+       Each block body lives in its own HTML file, next to this page
+       (flat layout: blocks, images and instructions.html in the same
+       directory, so relative paths work both locally and under /static/). */
+    var BLOCKS = [
+      { file: 'block-step1-portal.html',      title: 'Step 1 – Connect to the Swisscom Portal' },
+      { file: 'block-step2-cnpg-plugin.html', title: 'Step 2 – Install the kubectl-cnpg plugin' },
+      { file: 'block-step3-dashboard.html',   title: 'Step 3 – Kubernetes Dashboard' },
+      { file: 'block-lab1-cluster.html',      title: 'Lab 1 – Deploy a Cluster' },
+      { file: 'block-lab2-anonymizer.html',   title: 'Lab 2 – PostgreSQL Anonymizer' },
+      { file: 'block-lab3-bootstrap.html',    title: 'Lab 3 – Bootstrap Data' },
+      { file: 'block-lab4-replica-pool.html', title: 'Lab 4 – Replica Pool' }
+    ];
+
+    /* Build the accordion skeleton, then fill each body with its file */
+    function loadBlocks() {
+      var accordion = document.getElementById('workshopAccordion');
+      return Promise.all(BLOCKS.map(function (block, i) {
+        var id = 'block' + i;
+        var open = (i === 0);
+        var item = document.createElement('div');
+        item.className = 'accordion-item';
+        item.innerHTML =
+          '<h2 class="accordion-header">' +
+            '<button class="accordion-button' + (open ? '' : ' collapsed') + '" type="button"' +
+            ' data-bs-toggle="collapse" data-bs-target="#' + id + '"' +
+            ' aria-expanded="' + open + '" aria-controls="' + id + '"></button>' +
+          '</h2>' +
+          '<div id="' + id + '" class="accordion-collapse collapse' + (open ? ' show' : '') + '"' +
+          ' data-bs-parent="#workshopAccordion">' +
+            '<div class="accordion-body">Loading…</div>' +
+          '</div>';
+        item.querySelector('.accordion-button').textContent = block.title;
+        accordion.appendChild(item);
+
+        var body = item.querySelector('.accordion-body');
+        return fetch(block.file)
+          .then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.text();
+          })
+          .then(function (html) { body.innerHTML = html; })
+          .catch(function (err) {
+            body.innerHTML = '<div class="alert alert-danger">Unable to load <code></code>: </div>';
+            body.querySelector('code').textContent = block.file;
+            body.querySelector('.alert').appendChild(document.createTextNode(err.message));
+          });
+      }));
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
-      /* Replace placeholders first, then highlight: hljs splits code into
-         spans which could break a placeholder across several nodes. */
-      userDataPromise
-        .then(applyUserData)
-        .catch(function (err) { console.warn('Unable to load user data:', err); })
+      /* Load blocks, then replace placeholders, then highlight: hljs splits
+         code into spans which could break a placeholder across several nodes. */
+      var userData = userDataPromise.catch(function (err) {
+        console.warn('Unable to load user data:', err);
+        return {};
+      });
+      Promise.all([loadBlocks(), userData])
+        .then(function (res) { applyUserData(res[1]); })
         .then(decorateCodeBlocks);
     });
 

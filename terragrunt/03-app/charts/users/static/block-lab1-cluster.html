@@ -1,0 +1,41 @@
+            <div class="callout-goal p-3 rounded mb-3">
+              <strong>Goal:</strong> Deploy a 3-instance PostgreSQL cluster managed by CloudNativePG, explore the created resources and test failover.
+            </div>
+
+            <h6>1. Create a cluster</h6>
+            <p>In a new folder, create a <code>lab1.yaml</code> file with:</p>
+            <pre><code class="language-yaml">apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: prod
+spec:
+  instances: 3
+  storage:
+    size: 2Gi</code></pre>
+
+            <p>Deploy the manifest:</p>
+            <pre><code class="language-bash">kubectl apply -f lab1.yaml</code></pre>
+
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Note:</strong> The installation of Cloud Native PG is mantory before deployment of your first cluster.
+            </div>
+
+
+            <h6>2. Inspect Kubernetes objects</h6>
+            <pre><code class="language-bash">kubectl get pod,service,secret,pvc -l "app.kubernetes.io/managed-by=cloudnative-pg"</code></pre>
+
+            <h6>3. Check cluster status</h6>
+            <pre><code class="language-bash">kubectl get cluster
+kubectl cnpg status prod # check timeline: 1</code></pre>
+
+            <h6>4. Connect to the cluster</h6>
+            <pre><code class="language-bash">kubectl cnpg psql prod</code></pre>
+
+            <h6>5. Kill replica or primary</h6>
+            <pre><code class="language-bash">kubectl delete pod prod-3 # kill a replica
+
+kubectl delete pod prod-1 # kill the primary
+kubectl cnpg status prod  # notice timeline increment: 2
+
+# Kill all cluster pods
+kubectl delete pod -l "app.kubernetes.io/managed-by=cloudnative-pg"</code></pre>
