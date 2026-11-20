@@ -38,6 +38,17 @@ image:
   pullPolicy: IfNotPresent
   tag: "latest"
 
+# Static files (instructions.html, block-*.html, images) are fetched from
+# GitHub by an initContainer into an emptyDir mounted on /static.
+static:
+  repo: https://github.com/Vampouille/cloudnative-pg-anonymizer-lab.git
+  ref: main
+  path: terragrunt/03-app/charts/users/static
+  image:
+    repository: alpine/git
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
 
 # This is to override the chart name.
 nameOverride: ""

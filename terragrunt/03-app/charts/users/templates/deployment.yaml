@@ -16,6 +16,30 @@ spec:
         {{- include "users.labels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "users.fullname" . }}
+      initContainers:
+        # Fill the static emptyDir from GitHub (flat directory: instructions,
+        # blocks, images). Restart the pod to pick up new commits.
+        - name: fetch-static
+          image: "{{ .Values.static.image.repository }}:{{ .Values.static.image.tag }}"
+          imagePullPolicy: {{ .Values.static.image.pullPolicy }}
+          command: ["sh", "-ec"]
+          args:
+            - |
+              git clone --depth 1 --filter=blob:none --sparse --branch "$GIT_REF" "$GIT_REPO" /tmp/repo
+              git -C /tmp/repo sparse-checkout set "$GIT_PATH"
+              cp -v /tmp/repo/"$GIT_PATH"/* /static/
+          env:
+            - name: GIT_REPO
+              value: {{ .Values.static.repo | quote }}
+            - name: GIT_REF
+              value: {{ .Values.static.ref | quote }}
+            - name: GIT_PATH
+              value: {{ .Values.static.path | quote }}
+          volumeMounts:
+            - name: static
+              mountPath: /static
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: nginx
           #securityContext:
@@ -75,8 +99,7 @@ spec:
           configMap:
             name: {{ include "users.fullname" . }}-nginx-conf
         - name: static
-          secret:
-            secretName: {{ include "users.fullname" . }}-static
+          emptyDir: {}
         {{- range .Values.users }}
         - name: {{ .user }}
           secret:
