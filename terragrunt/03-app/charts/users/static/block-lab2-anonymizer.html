@@ -2,7 +2,7 @@
               <strong>Goal:</strong> Deploy a cluster with the PostgreSQL Anonymizer extension and define masking rules on sensitive data.
             </div>
 
-            <h6>1. Deploy the ClusterImageCatalog</h6>
+            <h3 class="lab-step">Deploy the ClusterImageCatalog</h3>
             <p>Create a file <code>cluster-image-catalog.yaml</code>:</p>
             <pre><code class="language-yaml">---
 apiVersion: postgresql.cnpg.io/v1
@@ -25,10 +25,10 @@ spec:
             <p>Deploy the manifest:</p>
             <pre><code class="language-bash">kubectl apply -f cluster-image-catalog.yaml</code></pre>
 
-            <h6>2. Clean up the previous cluster</h6>
+            <h3 class="lab-step">Clean up the previous cluster</h3>
             <pre><code class="language-bash">kubectl delete cluster prod</code></pre>
 
-            <h6>3. Deploy a new cluster with PostgreSQL Anonymizer</h6>
+            <h3 class="lab-step">Deploy a new cluster with PostgreSQL Anonymizer</h3>
             <p>Create a file <code>prod-anon.yaml</code>:</p>
             <pre><code class="language-yaml">---
 apiVersion: postgresql.cnpg.io/v1
@@ -62,7 +62,7 @@ spec:
 
             <pre><code class="language-bash">kubectl apply -f prod-anon.yaml</code></pre>
 
-            <h6>4. Create a <code>people</code> table in the <code>app</code> database</h6>
+            <h3 class="lab-step">Create a <code>people</code> table in the <code>app</code> database</h3>
             <pre><code class="language-bash">kubectl cnpg psql prod -- app</code></pre>
             <pre><code class="language-sql">CREATE TABLE people AS
     SELECT  153478       AS id,
@@ -70,21 +70,21 @@ spec:
             'Conor'      AS lastname,
             '0609110911' AS phone;</code></pre>
 
-            <h6>5. Define masking rules</h6>
+            <h3 class="lab-step">Define masking rules</h3>
             <pre><code class="language-sql">SECURITY LABEL FOR anon ON COLUMN people.lastname
   IS 'MASKED WITH FUNCTION anon.dummy_last_name()';
 
 SECURITY LABEL FOR anon ON COLUMN people.phone
   IS 'MASKED WITH FUNCTION anon.partial(phone,2,$$******$$,2)';</code></pre>
 
-            <h6>6. Create a masked user</h6>
+            <h3 class="lab-step">Create a masked user</h3>
             <pre><code class="language-sql">CREATE ROLE skynet LOGIN;
 
 SECURITY LABEL FOR anon ON ROLE skynet IS 'MASKED';
 
 GRANT pg_read_all_data to skynet;</code></pre>
 
-            <h6>7. Connect with the <code>skynet</code> role</h6>
+            <h3 class="lab-step">Connect with the <code>skynet</code> role</h3>
             <pre><code class="language-bash">kubectl cnpg psql prod -- -h localhost --username skynet app</code></pre>
 
             <div class="callout-tip p-3 rounded mb-3">
@@ -92,5 +92,5 @@ GRANT pg_read_all_data to skynet;</code></pre>
               <code>peer</code> connection cannot be used for the <code>skynet</code> role.
             </div>
 
-            <h6>8. Inspect data</h6>
+            <h3 class="lab-step">Inspect data</h3>
             <pre><code class="language-sql">TABLE people;</code></pre>
