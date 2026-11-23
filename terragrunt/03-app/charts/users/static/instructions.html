@@ -18,6 +18,37 @@
     /* Callout blocks */
     .callout-goal { border-left: 4px solid #198754; background: #d1e7dd; }
     .callout-tip  { border-left: 4px solid #ffc107; background: #fff3cd; }
+    /* Lab steps (h3): auto-numbered with a round badge */
+    .accordion-body { counter-reset: lab-step; }
+    .lab-step {
+      counter-increment: lab-step;
+      display: flex; align-items: center; gap: .6rem;
+      font-size: 1.2rem; font-weight: 700; color: #1a4d8a;
+      margin: 2.25rem 0 1rem; padding-bottom: .4rem;
+      border-bottom: 2px solid #cfe0f5;
+    }
+    .lab-step::before {
+      content: counter(lab-step);
+      flex: none; width: 1.8rem; height: 1.8rem; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #1a4d8a; color: #fff; font-size: .95rem;
+    }
+    /* Wizard sub-steps (h4), grouped in a .wizard container */
+    .wizard {
+      border-left: 3px solid #cfe0f5;
+      margin: 1rem 0 1rem .85rem; padding-left: 1.25rem;
+    }
+    .wizard-step {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: 1rem; font-weight: 600; color: #1a4d8a;
+      background: #e8f1fb; border: 1px solid #cfe0f5; border-radius: .4rem;
+      padding: .3rem .75rem; margin: 1.5rem 0 .75rem;
+    }
+    .wizard-step:first-child { margin-top: .25rem; }
+    .wizard-num {
+      font-size: .75rem; font-weight: 700; color: #fff;
+      background: #0d6efd; border-radius: 1rem; padding: .1rem .5rem;
+    }
     /* SA token display */
     #token-text {
       font-family: 'Courier New', monospace;
@@ -208,9 +239,8 @@
        (flat layout: blocks, images and instructions.html in the same
        directory, so relative paths work both locally and under /static/). */
     var BLOCKS = [
-      { file: 'block-step1-portal.html',      title: 'Step 1 – Connect to the Swisscom Portal' },
-      { file: 'block-step2-cnpg-plugin.html', title: 'Step 2 – Install the kubectl-cnpg plugin' },
-      { file: 'block-step3-dashboard.html',   title: 'Step 3 – Kubernetes Dashboard' },
+      { file: 'block-step1-portal.html',      title: 'Lab 1 – Kubernetes Cluster' },
+      { file: 'block-lab2-access.html',       title: 'Lab 2 – Tools and Cluster Access' },
       { file: 'block-lab1-cluster.html',      title: 'Lab 1 – Deploy a Cluster' },
       { file: 'block-lab2-anonymizer.html',   title: 'Lab 2 – PostgreSQL Anonymizer' },
       { file: 'block-lab3-bootstrap.html',    title: 'Lab 3 – Bootstrap Data' },

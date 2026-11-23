@@ -2,7 +2,7 @@
               <strong>Goal:</strong> Deploy a 3-instance PostgreSQL cluster managed by CloudNativePG, explore the created resources and test failover.
             </div>
 
-            <h6>1. Create a cluster</h6>
+            <h3 class="lab-step">Create a cluster</h3>
             <p>In a new folder, create a <code>lab1.yaml</code> file with:</p>
             <pre><code class="language-yaml">apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
@@ -21,17 +21,17 @@ spec:
             </div>
 
 
-            <h6>2. Inspect Kubernetes objects</h6>
+            <h3 class="lab-step">Inspect Kubernetes objects</h3>
             <pre><code class="language-bash">kubectl get pod,service,secret,pvc -l "app.kubernetes.io/managed-by=cloudnative-pg"</code></pre>
 
-            <h6>3. Check cluster status</h6>
+            <h3 class="lab-step">Check cluster status</h3>
             <pre><code class="language-bash">kubectl get cluster
 kubectl cnpg status prod # check timeline: 1</code></pre>
 
-            <h6>4. Connect to the cluster</h6>
+            <h3 class="lab-step">Connect to the cluster</h3>
             <pre><code class="language-bash">kubectl cnpg psql prod</code></pre>
 
-            <h6>5. Kill replica or primary</h6>
+            <h3 class="lab-step">Kill replica or primary</h3>
             <pre><code class="language-bash">kubectl delete pod prod-3 # kill a replica
 
 kubectl delete pod prod-1 # kill the primary
