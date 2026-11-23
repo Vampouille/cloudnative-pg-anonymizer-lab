@@ -1,14 +1,64 @@
             <div class="callout-goal p-3 rounded mb-3">
-              <strong>Goal:</strong> Install the <code>kubectl-cnpg</code> plugin (v1.29.0) to interact with CloudNativePG clusters via <code>kubectl</code>.
+              <strong>Goal:</strong> Install the tools, check that you can reach the cluster created in Lab 1,
+              and open its Kubernetes Dashboard.
             </div>
 
-            <p>
-            Follow instructions from official <a href="https://cloudnative-pg.io/docs/1.29/kubectl-plugin#install">documentation</a>.
-            You can also download the archive for your platform from the
-              <a href="https://github.com/cloudnative-pg/cloudnative-pg/releases/tag/v1.29.0" target="_blank">GitHub release page</a>,
-              extract it and place the binary in your <code>PATH</code>.
-            </p>
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Windows users:</strong> run every command of this workshop in your <strong>WSL</strong> terminal
+              (not PowerShell) and use the Linux instructions.
+            </div>
+
+            <h3 class="lab-step">Install kubectl</h3>
+            <pre><code class="language-bash"># Linux / WSL (amd64)
+curl -LO "https://dl.k8s.io/release/v1.35.8/bin/linux/amd64/kubectl"
+chmod +x kubectl &amp;&amp; sudo mv kubectl /usr/local/bin/
+
+# macOS (Homebrew)
+brew install kubectl</code></pre>
+            <pre><code class="language-bash">kubectl version --client</code></pre>
+
+            <h3 class="lab-step">Check access to your cluster</h3>
+            <p>Point <code>kubectl</code> to the kubeconfig saved at the end of Lab 1:</p>
+            <pre><code class="language-bash">export KUBECONFIG=~/workshop/kubeconfig
+kubectl get nodes
+kubectl get pods -A</code></pre>
+            <p>You should see one <code>Ready</code> node, plus running pods for applications.</p>
+
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Important:</strong> <code>export</code> only applies to the current terminal.
+              <strong>Every time you open a new terminal</strong>, run
+              <code>export KUBECONFIG=~/workshop/kubeconfig</code> again.
+              If <code>kubectl</code> answers <em>connection refused … localhost:8080</em>,
+              this variable is missing.
+            </div>
+
+            <h3 class="lab-step">Install the kubectl-cnpg plugin</h3>
+            <p>Install a <strong>1.30.x</strong> version of the plugin, to match the operator deployed in your cluster.</p>
+            <p>The plugin is a single binary, <code>kubectl-cnpg</code>: download the archive for your platform from the
+              <a href="https://github.com/cloudnative-pg/cloudnative-pg/releases" target="_blank">GitHub releases</a>
+              (e.g. <code>kubectl-cnpg_1.30.x_linux_x86_64.tar.gz</code>), extract it and copy
+              <code>kubectl-cnpg</code> to a directory of your <code>PATH</code>, such as <code>/usr/local/bin</code>.</p>
+
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Alternatives:</strong> the
+              <a href="https://cloudnative-pg.io/docs/current/kubectl-plugin#install" target="_blank">official documentation</a>
+              also provides an install script (<code>curl … | sh</code>), as well as <code>.deb</code>/<code>.rpm</code> packages
+              and a Homebrew formula (<code>brew install kubectl-cnpg</code>, which installs the latest version).
+            </div>
 
             <p>Verify the installation:</p>
             <pre><code class="language-bash">kubectl cnpg version</code></pre>
 
+            <h3 class="lab-step">Open the Kubernetes Dashboard</h3>
+            <p>The Swisscom portal gives access to a Kubernetes Dashboard for your cluster:</p>
+            <ol>
+              <li>Go back to the <a href="__SC_URL__" target="_blank">Swisscom Portal</a> and open your cluster page.</li>
+              <li>Click <strong>Open Dashboard</strong>.</li>
+            </ol>
+            <p>Use it to browse the namespaces, pods and resources created during the next labs.</p>
+
+            <div class="callout-tip p-3 rounded mb-3">
+              <strong>Tip:</strong> Consider also installing
+              <a href="https://k9scli.io/" target="_blank">k9s</a>,
+              a terminal UI to browse pods, logs and events without typing <code>kubectl</code> commands.
+            </div>
